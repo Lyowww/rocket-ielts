@@ -26,6 +26,7 @@ const useSignup = () => {
       last_name: "",
       email: "",
       password: "",
+      password_confirm: "",
     },
   });
 
@@ -50,7 +51,14 @@ const useSignup = () => {
 
   const handleFormSubmit = async (data: SignupSchemaType) => {
     if (!isPending) {
-      mutate(data);
+      const payload: SignupPayload = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        password: data.password,
+        password_confirm: data.password_confirm,
+      };
+      mutate(payload);
     }
   };
 
@@ -58,7 +66,6 @@ const useSignup = () => {
     control,
     errors,
     isPending,
-
     handleSubmit,
     handleFormSubmit,
   };

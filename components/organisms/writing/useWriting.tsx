@@ -19,7 +19,7 @@ const useWriting = () => {
 
   const handleChangeStep = useCallback((cur: number) => {
     setStep(cur);
-  }, []);
+  }, [setStep]);
 
   const handleChoosePath = (path: "ac" | "ge") => {
     setPath(path);
@@ -44,7 +44,7 @@ const useWriting = () => {
 
   const handleQuestiontextChange = useCallback((txt: string) => {
     setQustomQuestion(txt);
-  }, []);
+  }, [setQustomQuestion]);
 
   useEffect(() => {
     document.body.style.backgroundColor = "white";

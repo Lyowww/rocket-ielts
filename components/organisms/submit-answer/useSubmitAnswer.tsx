@@ -20,6 +20,7 @@ import { toast } from "sonner";
 const useSubmitAnswer = () => {
   const requestCountRef = useRef(0);
   const isFirstAnswer = useRef<number>(1);
+  const hasPrefetchedRef = useRef(false);
   const [showResults, setShowResults] = useState<boolean>(false);
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>("");
@@ -204,19 +205,21 @@ const useSubmitAnswer = () => {
   };
 
   useEffect(() => {
-    if (examType && taskNumber && !isPending && !image && !question) {
+    if (hasPrefetchedRef.current) return;
+    if (examType && taskNumber && !image && !question) {
+      hasPrefetchedRef.current = true;
       mutate({
         exam_type: examType,
         task_number: String(questionChoice),
       });
     }
-  }, [examType, taskNumber]);
+  }, [examType, taskNumber, image, question, questionChoice, mutate]);
 
   useLayoutEffect(() => {
     if (!examType || !taskNumber) {
       push("/");
     }
-  }, [examType, taskNumber]);
+  }, [examType, taskNumber, push]);
 
   return {
     image,

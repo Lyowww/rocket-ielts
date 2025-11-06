@@ -131,3 +131,19 @@
     @apply max-w-[1920px] mx-auto xl:px-32 lg:px-20 md:px-10 px-4;
   }
 }
+
+.scrollbar-23085A {
+  scrollbar-width: thin;
+  scrollbar-color: #23085A transparent;
+}
+.scrollbar-23085A::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-23085A::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-23085A::-webkit-scrollbar-thumb {
+  background-color: #23085A;
+  border-radius: 9999px;
+}

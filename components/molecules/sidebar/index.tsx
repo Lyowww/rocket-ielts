@@ -13,7 +13,6 @@ interface SidebarProps {
 
 const Sidebar = ({ className }: SidebarProps) => {
   const { isOpen, toggleSidebar } = useSidebarStore();
-
   return (
     <aside
       className={cn(
@@ -24,36 +23,17 @@ const Sidebar = ({ className }: SidebarProps) => {
     >
       <div className="flex h-full flex-col gap-[55px]">
         <div className={cn("flex items-start justify-between", isOpen ? "" : "items-center justify-center")}>
-          <div 
+          <div
             className={cn(
               "p-[31px] cursor-pointer transition-all duration-200",
               !isOpen && "group"
             )}
             onClick={() => {
-              if (!isOpen) {
-                toggleSidebar();
-              }
+              toggleSidebar();
             }}
           >
-            {isOpen ? (
-              <Logo className="w-full h-full" />
-            ) : (
-              <div className="relative">
-                <Logo className="w-[77px] h-[43.89px] group-hover:opacity-0 transition-opacity duration-200" />
-                <CloseSideBarIcon className="absolute w-[50px] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-              </div>
-            )}
+            <CloseSideBarIcon className="" />
           </div>
-          {isOpen && (
-            <div
-              className="p-[31px] px-[12px] cursor-pointer"
-              onClick={() => {
-                toggleSidebar();
-              }}
-            >
-              <CloseSideBarIcon />
-            </div>
-          )}
         </div>
 
         <div className="flex flex-col gap-[73px]">

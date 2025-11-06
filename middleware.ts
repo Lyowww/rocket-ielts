@@ -14,11 +14,14 @@ export async function middleware(request: NextRequest) {
 
   const isTokenValid = access_token || refresh_token;
 
-  // if (isTokenValid && PUBLIC_ROUTES.has(pathname as PublicRoutesEnum)) {
-  //   return NextResponse.redirect(
-  //     new URL(PrivateRouteEnum.dashboard, request.url)
-  //   );
-  // }
+  if (
+    isTokenValid &&
+    (pathname === PublicRoutesEnum.signin || pathname === PublicRoutesEnum.signup)
+  ) {
+    return NextResponse.redirect(
+      new URL(PrivateRouteEnum.dashboard, request.url)
+    );
+  }
 
   if (!isTokenValid && PRIVATE_ROUTES.has(pathname as PrivateRouteEnum)) {
     return NextResponse.redirect(new URL(PublicRoutesEnum.signin, request.url));

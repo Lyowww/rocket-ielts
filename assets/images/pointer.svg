@@ -42,12 +42,12 @@
      transform="translate(-47.458604,-55.87876)">
     <path
        id="path925"
-       style="fill:#d40f00;fill-opacity:1;fill-rule:evenodd;stroke:none;strokeWidth:2.08564;strokeLinecap:round;strokeLinejoin:round;paint-order:fill markers stroke"
+       style="fill:#d40f00;fillOpacity:1;fillRule:evenodd;stroke:none;strokeWidth:2.08564;strokeLinecap:round;strokeLinejoin:round;paint-order:fill markers stroke"
        d="m 85.923437,55.87876 c -11.118589,0.0099 -21.688949,4.830596 -28.986344,13.219348 -3.247346,3.501555 -5.982157,7.979289 -7.667749,13.61674 -0.08659,0.280672 -0.169971,0.562327 -0.250114,0.844909 -0.02704,0.09852 -0.05318,0.197929 -0.07958,0.29714 -0.974854,3.410555 -1.473259,6.939564 -1.481046,10.486698 0.0055,0.178501 0.01219,0.356961 0.02015,0.535368 -0.338878,18.987787 9.097711,33.178977 38.444681,73.660627 29.418635,-40.5805 38.837375,-54.81659 38.449855,-73.806871 0.005,-0.129683 0.0103,-0.259392 0.0145,-0.389124 -3e-5,-3.986552 -0.61979,-7.948868 -1.8371,-11.745019 -1.5665,-5.183159 -4.03043,-9.370124 -6.95462,-12.727389 C 108.28982,61.011475 97.407138,55.879634 85.923437,55.87876 Z"
        sodipodi:nodetypes="ccccccccccccc" />
     <path
        id="path1187"
-       style="fill:#ffffff;fill-rule:evenodd;strokeWidth:1.163;strokeLinecap:round;strokeLinejoin:round;paint-order:fill markers stroke"
+       style="fill:#ffffff;fillRule:evenodd;strokeWidth:1.163;strokeLinecap:round;strokeLinejoin:round;paint-order:fill markers stroke"
        d="M 107.71902,94.13839 A 21.79583,21.79583 0 0 1 85.923195,115.93422 21.79583,21.79583 0 0 1 64.127365,94.13839 21.79583,21.79583 0 0 1 85.923195,72.34256 21.79583,21.79583 0 0 1 107.71902,94.13839 Z" />
   </g>
 </svg>

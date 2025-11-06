@@ -1,4 +1,5 @@
 import Dashboard from "@/components/organisms/dashboard";
+import ReduxProvider from "@/components/organisms/redux-provider";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="w-full mt-[12.08px]">
-      <Dashboard />
+        <Dashboard />
     </div>
   );
 }

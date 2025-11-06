@@ -78,6 +78,20 @@ const Signup = () => {
         name="password"
       />
 
+      <Controller
+        control={control}
+        render={({ field }) => (
+          <Input
+            type="password"
+            placeholder="Confirm Password"
+            className="py-3"
+            error={errors?.password_confirm?.message}
+            {...field}
+          />
+        )}
+        name="password_confirm"
+      />
+
       <Button
         isLoading={isPending}
         type="submit"

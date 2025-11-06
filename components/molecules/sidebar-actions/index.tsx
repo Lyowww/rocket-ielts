@@ -1,5 +1,5 @@
+import { NewTestIcon } from "@/assets/icons/NewTestIcon";
 import { PenIcon } from "@/assets/icons/PenIcon";
-import { PlayIcon } from "@/assets/icons/PlayIcon";
 import SidebarActionButton from "@/components/atom/sidebar-action-button";
 import { cn } from "@/lib/utils";
 
@@ -13,17 +13,17 @@ const SidebarActions = ({ isOpen, className }: SidebarActionsProps) => {
   return (
     <div className={`px-[18px] space-y-4 ${className || ""}`}>
       <SidebarActionButton
-        icon={<PenIcon />}
+        icon={<NewTestIcon />}
         isOpen={isOpen}
         className={cn("bg-[#C7002B] flex items-center justify-center hover:bg-[#C7002B]/80  cursor-pointer shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]", isOpen ? "px-[19.5px] py-[16px]" : "py-3")}
         onClick={() => {
-          console.log("Take a New Writing Test clicked");
+          console.log("Take a New Test clicked");
         }}
       >
-        Take a New Writing Test
+        Take a New Test
       </SidebarActionButton>
 
-      <div className="p-[2px] bg-gradient-to-r from-[#23085A] via-[#9C66FF] to-[#DCDCDC] rounded-[7px]">
+      {/* <div className="p-[2px] bg-[#23085A] rounded-[7px]">
         <SidebarActionButton
           icon={<PlayIcon />}
           isOpen={isOpen}
@@ -34,7 +34,7 @@ const SidebarActions = ({ isOpen, className }: SidebarActionsProps) => {
         >
           Continue Recent Practice
         </SidebarActionButton>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -15,12 +15,12 @@ interface SidebarNavigationProps {
 
 const navigationItems = [
   {
-    name: "Dashboard",
+    name: "My compass",
     href: "/",
     icon: DashboardIcon,
   },
   {
-    name: "My Profile",
+    name: "My profile",
     href: "/profile",
     icon: MyProfileIcon,
   },
@@ -30,7 +30,7 @@ const navigationItems = [
     icon: MessagingIcon,
   },
   {
-    name: "Select a Teacher",
+    name: "Select a guide",
     href: "/teachers",
     icon: SelectTeacherIcon,
   },

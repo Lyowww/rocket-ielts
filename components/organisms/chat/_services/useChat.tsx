@@ -115,7 +115,7 @@ const useChat = (firstRound: React.RefObject<number>,isFirstFeedback:React.RefOb
     if (!prev_payload || !chat_question) {
       push("/");
     }
-  }, [chat_question, prev_payload]);
+  }, [chat_question, prev_payload, push]);
 
   return {
     answer,

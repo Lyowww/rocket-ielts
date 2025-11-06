@@ -63,7 +63,7 @@ const Chat = () => {
     } else {
       setShowChallengeCompleteModal(false);
     }
-  }, [chat_question]);
+  }, [chat_question, resetIsFirstAnswerOfChallenge]);
 
 
   useEffect(() => {
@@ -75,7 +75,7 @@ const Chat = () => {
     } else {
       setShowPracticeCompleteModal(false);
     }
-  }, [chat_question]);
+  }, [chat_question, isFirstAnswer, resetIsFirstAnswerOfChallenge]);
 
   const router = useRouter();
 
@@ -89,7 +89,15 @@ const Chat = () => {
     setShowChallengeCompleteModal(false);
     setShowQuestion(false);
     setShowAnswer(false);
-  }, [challengeRound, handleFirstRoundSend, resetIsFirstAnswerOfChallenge]);
+  }, [
+    challengeRound,
+    handleFirstRoundSend,
+    resetIsFirstAnswerOfChallenge,
+    setShowPracticeCompleteModal,
+    setShowChallengeCompleteModal,
+    setShowQuestion,
+    setShowAnswer,
+  ]);
 
   const feedbackContent = useMemo(() => {
     if (typeof chat_question !== 'object') return null;
@@ -125,7 +133,7 @@ const Chat = () => {
         <div>{chat_question.current_feedback}</div>
       </>
     );
-  }, [chat_question, isFirstFeedback]);
+  }, [chat_question]);
 
 
 

@@ -151,7 +151,7 @@ export const ScoreMap = ({ currentScore, maxScore }: ScoreMapProps) => {
   const pathLength = 650;
 
   return (
-    <div className="w-full h-[230px] rounded-[12px] p-6 relative overflow-hidden">
+    <div className="w-full h-full rounded-[12px] p-6 relative overflow-hidden">
       {mapLoaded && mapTileUrl ? (
         <div
           className="absolute inset-0 w-full h-full"
@@ -165,7 +165,7 @@ export const ScoreMap = ({ currentScore, maxScore }: ScoreMapProps) => {
           }}
         />
       ) : (
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-200 to-slate-400" />
+        <div className="absolute inset-0 w-full h-full bg-[#23085A]" />
       )}
 
       <div className="absolute inset-0 w-full h-full bg-black/15" />
@@ -244,7 +244,7 @@ export const ScoreMap = ({ currentScore, maxScore }: ScoreMapProps) => {
           <p className="text-sm text-[#575353]">You are {progressPercentage.toFixed(1)}% away from your target</p>
           <div className="w-20 h-2 bg-gray-200 rounded-full mt-2">
             <div
-              className="h-full bg-gradient-to-r from-[#651FFF] to-[#23085A] rounded-full transition-all duration-500"
+              className="h-full bg-[#23085A] rounded-full transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>

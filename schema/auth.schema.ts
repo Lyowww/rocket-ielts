@@ -51,4 +51,14 @@ export const signupSchema = z.object({
     .min(6, {
       message: "Password must be at least 6 characters",
     }),
+  password_confirm: z
+    .string({ required_error: "Please confirm your password" })
+    .nonempty({ message: "Please confirm your password" })
+    .trim()
+    .min(6, {
+      message: "Password confirmation must be at least 6 characters",
+    }),
+}).refine((data) => data.password === data.password_confirm, {
+  path: ["password_confirm"],
+  message: "Passwords do not match",
 });
