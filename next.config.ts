@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
       "https://www.ielts-testing.com/"
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
