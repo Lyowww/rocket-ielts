@@ -13,7 +13,7 @@ type RecentActivitiesProps = {
 const tabs = [
     {
         id: 0,
-        title: "Your Progress",
+        title: "Your Journey",
         subTitle: "Track your journey to IELTS success",
     },
     {
@@ -77,7 +77,7 @@ export const RecentActivities = ({ selectedTab }: RecentActivitiesProps) => {
                         {tabs[selectedTab].icon}
                     </div>
                 ) : (
-                    <p className="transition-all duration-300 ease-in-out text-[28px] font-semibold text-start text-[#23085A] shrink-0">
+                    <p className="transition-all duration-300 ease-in-out text-[16px] sm:text-[20px]  font-semibold text-start text-[#23085A] shrink-0">
                         {tabs[selectedTab].title}
                     </p>
                 )}
