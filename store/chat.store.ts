@@ -1,7 +1,8 @@
 import { create } from "zustand";
+import { ExamCategory } from "@/types/exam";
 
 interface Payload {
-  exam_type: "ac" | "ge";
+  exam_type: ExamCategory;
   task_number: string;
   answer_text: string;
   image_path: string;

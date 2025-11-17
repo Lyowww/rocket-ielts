@@ -1,7 +1,11 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { PrivateRouteEnum } from "@/enum/routes.enum";
 import { NewTestIcon } from "@/assets/icons/NewTestIcon";
-import { PenIcon } from "@/assets/icons/PenIcon";
 import SidebarActionButton from "@/components/atom/sidebar-action-button";
 import { cn } from "@/lib/utils";
+import { useQuestionOrImageStore } from "@/store/questionOrImage.store";
 
 interface SidebarActionsProps {
   isOpen: boolean;
@@ -9,16 +13,34 @@ interface SidebarActionsProps {
 }
 
 const SidebarActions = ({ isOpen, className }: SidebarActionsProps) => {
-  
+  const router = useRouter();
+  const {
+    setExamType,
+    setTaskNumber,
+    setQuestionChoice,
+    setQuestion,
+    setImage,
+    setUploadResponse,
+    setAnswerimage,
+  } = useQuestionOrImageStore();
+
+  const handleTakeNewTest = () => {
+    setExamType("writing");
+    setTaskNumber(2);
+    setQuestionChoice(1);
+    setQuestion(undefined);
+    setImage(undefined);
+    setUploadResponse(undefined);
+    setAnswerimage(undefined);
+    router.push(PrivateRouteEnum.test);
+  };
   return (
     <div className={`px-[18px] space-y-4 ${className || ""}`}>
       <SidebarActionButton
         icon={<NewTestIcon />}
         isOpen={isOpen}
         className={cn("bg-[#C7002B] flex items-center justify-center hover:bg-[#C7002B]/80  cursor-pointer shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]", isOpen ? "px-[19.5px] py-[16px]" : "py-3")}
-        onClick={() => {
-          console.log("Take a New Test clicked");
-        }}
+        onClick={handleTakeNewTest}
       >
         Take a New Test
       </SidebarActionButton>

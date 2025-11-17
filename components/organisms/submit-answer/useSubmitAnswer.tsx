@@ -20,7 +20,6 @@ import { toast } from "sonner";
 const useSubmitAnswer = () => {
   const requestCountRef = useRef(0);
   const isFirstAnswer = useRef<number>(1);
-  const hasPrefetchedRef = useRef(false);
   const [showResults, setShowResults] = useState<boolean>(false);
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [answer, setAnswer] = useState<string>("");
@@ -55,7 +54,7 @@ const useSubmitAnswer = () => {
             : false;
           setChatQuestion(ques?.answer);
           setPrevPayload({
-            exam_type: examType as "ac" | "ge",
+            exam_type: examType ?? "writing",
             task_number: String(questionChoice),
             answer_text: answer,
             image_path:
@@ -142,7 +141,7 @@ const useSubmitAnswer = () => {
     }
     
     const payload: SubmitQuestionPayload = {
-      exam_type: examType as "ac" | "ge",
+      exam_type: examType ?? "writing",
       task_number: String(questionChoice),
       answer_text: answer,
       image_path: (data?.question_path as string) || (base64File as string),
@@ -176,7 +175,7 @@ const useSubmitAnswer = () => {
       : false;
 
     const payload: SubmitQuestionPayload = {
-      exam_type: examType as "ac" | "ge",
+      exam_type: examType ?? "writing",
       task_number: String(questionChoice),
       answer_text: answer,
       image_path: (data?.question_path as string) || (base64File as string),
@@ -205,15 +204,13 @@ const useSubmitAnswer = () => {
   };
 
   useEffect(() => {
-    if (hasPrefetchedRef.current) return;
-    if (examType && taskNumber && !image && !question) {
-      hasPrefetchedRef.current = true;
+    if (examType && taskNumber && !isPending && !image && !question) {
       mutate({
         exam_type: examType,
         task_number: String(questionChoice),
       });
     }
-  }, [examType, taskNumber, image, question, questionChoice, mutate]);
+  }, [examType, taskNumber, mutate, isPending, image, question, questionChoice]);
 
   useLayoutEffect(() => {
     if (!examType || !taskNumber) {

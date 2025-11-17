@@ -11,8 +11,10 @@ interface SignupPayload {
   password_confirm: string;
 }
 
+type ExamCategory = import("@/types/exam").ExamCategory;
+
 interface UploadQuestionPayload {
-  exam_type: "ac" | "ge";
+  exam_type: ExamCategory;
   task_number: string;
   file_base64: string | undefined;
   file_type: string;
@@ -20,7 +22,7 @@ interface UploadQuestionPayload {
 }
 
 interface SubmitQuestionPayload {
-  exam_type: "ac" | "ge";
+  exam_type: ExamCategory;
   task_number: string;
   answer_text: string;
   next_challenge?: string;

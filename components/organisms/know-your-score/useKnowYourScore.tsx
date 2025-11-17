@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import { PrivateRouteEnum, PublicRoutesEnum } from "@/enum/routes.enum";
 import { useRouter } from "next/navigation";
 import { useQuestionOrImageStore } from "@/store/questionOrImage.store";
+import { ExamCategory } from "@/types/exam";
 
 type TestSchemaType = z.infer<typeof testSchema>;
 
@@ -115,7 +116,7 @@ const useKnowYourScore = () => {
       ...data,
       category: selectedTab,
     };
-    setExamType(updatedData.path === "Academic" ? "ac" : "ge");
+    setExamType(updatedData.category.toLowerCase() as ExamCategory);
     setTaskNumber(
       updatedData.question === "Create a test automatically" ? 2 : 1
     );

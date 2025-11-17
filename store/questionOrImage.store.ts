@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { ExamCategory } from "@/types/exam";
 
 type ShortQuestionData = {
   results: string;
@@ -10,7 +11,7 @@ type ShortQuestionData = {
 };
 
 interface questionOrImageP {
-  examType: "ac" | "ge" | undefined;
+  examType: ExamCategory | undefined;
   taskNumber: number | undefined;
   questionChoice: number | undefined;
   question: string | undefined;
@@ -21,7 +22,7 @@ interface questionOrImageP {
   shortQuestion: ShortQuestionData | undefined;
   setQuestion: (txt: string | undefined) => void;
   setImage: (img: File | undefined) => void;
-  setExamType: (exam: "ac" | "ge") => void;
+  setExamType: (exam: ExamCategory) => void;
   setTaskNumber: (task: number) => void;
   setQuestionChoice: (ques: number) => void;
   setTestType: (test: string) => void;
