@@ -45,14 +45,14 @@ const useSubmitAnswer = () => {
     useMutation({
       mutationKey: ["get_chat_questions"],
       mutationFn: (data: SubmitQuestionPayload) =>
-        chatService.getChatQuestion(data),
-      onSuccess: async (ques) => {
-        if (ques?.answer) {
+        questionService.submitAnswer(data),
+      onSuccess: async (responseData) => {
+        if (responseData?.answer) {
           const base64File = image ? await fileToBase64(image) : "";
           const answerFileBase64 = answerImage
             ? await fileToBase64(answerImage)
             : false;
-          setChatQuestion(ques?.answer);
+          setChatQuestion(responseData?.answer);
           setPrevPayload({
             exam_type: examType ?? "writing",
             task_number: String(questionChoice),
@@ -63,7 +63,7 @@ const useSubmitAnswer = () => {
             manualQues: question as string,
             challenge_detection: "1",
             primary_feedback: "1",
-            challenge_round:requestCountRef.current + 1,
+            challenge_round: requestCountRef.current + 1,
             mode: "0",
             first_round: "1",
             user_input: "",
@@ -72,7 +72,7 @@ const useSubmitAnswer = () => {
             left_without_completing: "0",
             completion: "1"
           });
-          push(PrivateRouteEnum.chat);
+          push(`${PrivateRouteEnum.chat}?_rsc=18xj5`);
         }
       },
     });
@@ -170,10 +170,14 @@ const useSubmitAnswer = () => {
 
   const getChatQuestionMutation = async () => {
     const base64File = image ? await fileToBase64(image) : "";
-    const answerFileBase64 = answerImage
-      ? await fileToBase64(answerImage)
-      : false;
+    const answerFileBase64 = answerImage ? await fileToBase64(answerImage) : "";
+    
+    if (!answer.trim() && !answerFileBase64) {
+      toast.error("Answer cannot be empty.");
+      return;
+    }
 
+    // Use the same payload structure as handleSubmit, but with mode "1" for practice
     const payload: SubmitQuestionPayload = {
       exam_type: examType ?? "writing",
       task_number: String(questionChoice),
@@ -182,24 +186,27 @@ const useSubmitAnswer = () => {
       imageAndText: image && question ? "1" : "0",
       manualQues: question as string,
       challenge_detection: "1",
-      mode: "1",
+      mode: "1", // Use mode "1" for practice chat
+      first_round: "1",
       left_without_completing: "0",
       completion: "1",
-      first_round: "1",
-      user_input: "",
-      challenge_round:  1,
+      user_input: questionChoice && questionChoice > 1 ? answer : "",
+      challenge_round: 1,
     };
 
     if (answerFileBase64) {
       payload.answer_file_base64 = answerFileBase64;
       payload.answer_file_type = answerImage?.type;
     }
+    
     setGeneratedQuestion({
       file: data?.question_path || image || undefined,
       text: uploadResponse,
       answer: answer,
       answerFile: answerImage,
     });
+    
+    // Submit answer and use response for practice chat
     chatQuestion(payload);
   };
 
