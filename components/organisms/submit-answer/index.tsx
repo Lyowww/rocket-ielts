@@ -3,7 +3,7 @@
 import Image from "next/image";
 import useSubmitAnswer from "./useSubmitAnswer";
 import { Button } from "@/components/atom/button";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { Textarea } from "@/components/atom/textarea";
 import {
   AlertDialog,
@@ -65,8 +65,42 @@ const SubmitAnswer = () => {
   console.log("data", data)
   console.log("uploadResponse", uploadResponse)
   console.log("question", question)
+
+  const questionImageSrc = useMemo(() => {
+    const rawQuestion = data?.question;
+    if (!rawQuestion) return undefined;
+
+    const trimmed = rawQuestion.trim();
+    if (!trimmed) return undefined;
+
+    if (trimmed.startsWith("data:image/")) {
+      return trimmed;
+    }
+
+    const sanitized = trimmed.replace(/\s/g, "");
+    const base64Regex = /^[A-Za-z0-9+/=]+$/;
+    const looksLikeBase64 =
+      sanitized.length > 100 &&
+      sanitized.length % 4 === 0 &&
+      base64Regex.test(sanitized);
+
+    if (!looksLikeBase64) return undefined;
+    return `data:image/png;base64,${sanitized}`;
+  }, [data?.question]);
+
+  const textQuestion = questionImageSrc
+    ? undefined
+    : (uploadResponse || question || data?.question);
+
   const isQuestionReady =
-    !!(uploadResponse || question || image || data?.question || data?.question_path);
+    !!(
+      uploadResponse ||
+      question ||
+      image ||
+      data?.question ||
+      data?.question_path ||
+      questionImageSrc
+    );
 
   const [waitForQuestionToSubmit, setWaitForQuestionToSubmit] = useState(false);
 
@@ -86,11 +120,22 @@ const SubmitAnswer = () => {
           </h2>
           {isPending && !isQuestionReady ? (
             <p className="mt-4 md:text-[18px] text-[16px] !font-bold">Loading ...</p>
-          ) : (uploadResponse || question || data?.question) ? (
+          ) : questionImageSrc ? (
+            <div className="mt-4">
+              <Image
+                src={questionImageSrc}
+                width={800}
+                height={400}
+                alt="Question image"
+                className="rounded"
+                unoptimized
+              />
+            </div>
+          ) : textQuestion ? (
             <div
               className="mt-4 md:text-[18px] text-[16px] !font-bold break-all max-w-[1000px]"
               dangerouslySetInnerHTML={{
-                __html: (uploadResponse || question || data?.question) as string,
+                __html: textQuestion as string,
               }}
             />
           ) : null}
