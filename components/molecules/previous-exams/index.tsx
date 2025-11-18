@@ -1,19 +1,16 @@
 "use client"
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { PenIcon } from "@/assets/icons";
 import { ChevronDown, SearchIcon, Settings2 } from "lucide-react";
 import { MapIcon } from "@/assets/icons/MapIcon";
 import { ReadingIcon } from "@/assets/icons/ReadingIcon";
 import { ListeningIcon } from "@/assets/icons/ListeningIcon";
 import { SpeakingIcon } from "@/assets/icons/SpeakingIcon";
+import { examService } from "@/services/exam.service";
+import { HistoricalExam } from "@/types/historical-exam";
+import { toast } from "sonner";
 
-interface ExamData {
-    id: number;
-    date: string;
-    skill: string;
-    score: number;
-    topic: string;
-}
+type ExamData = HistoricalExam;
 
 type SortField = 'date' | 'score' | null;
 type SortDirection = 'asc' | 'desc';
@@ -22,6 +19,8 @@ export const PreviousExams = () => {
     const [exams, setExams] = useState<ExamData[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchDropdownRef = useRef<HTMLDivElement>(null);
+    const loadMoreRef = useRef<HTMLDivElement>(null);
+    const latestRequestRef = useRef<number>(0);
 
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
@@ -31,8 +30,24 @@ export const PreviousExams = () => {
 
     const [sortField, setSortField] = useState<SortField>(null);
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+    const [page, setPage] = useState<number>(1);
+    const [pagination, setPagination] = useState({ count: 0, next: false, previous: false });
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
-    
+    const orderingParam = useMemo(() => {
+        if (!sortField) return undefined;
+        const prefix = sortDirection === 'desc' ? '-' : '';
+        return `${prefix}${sortField}`;
+    }, [sortField, sortDirection]);
+
+    const getNumericScore = (score: ExamData["score"]) => {
+        if (typeof score === "number") {
+            return score;
+        }
+        const parsed = parseFloat(score);
+        return Number.isNaN(parsed) ? 0 : parsed;
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -42,7 +57,68 @@ export const PreviousExams = () => {
         return () => clearTimeout(timer);
     }, [searchTerm]);
 
-    const normalize = (v: string) => v.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    useEffect(() => {
+        setPage(1);
+        setExams([]);
+        setPagination({ count: 0, next: false, previous: false });
+    }, [debouncedSearchTerm, orderingParam]);
+
+    const fetchHistoricalExams = useCallback(async () => {
+        const requestId = Date.now();
+        latestRequestRef.current = requestId;
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await examService.getHistoricalExams({
+                search: debouncedSearchTerm.trim() || undefined,
+                ordering: orderingParam,
+                page,
+            });
+
+            if (latestRequestRef.current !== requestId) {
+                return;
+            }
+
+            setExams((prev) => {
+                const incoming = response.results ?? [];
+                if (page === 1) {
+                    return incoming;
+                }
+                const existingIds = new Set(prev.map((exam) => exam.id));
+                const merged = [...prev];
+                incoming.forEach((exam) => {
+                    if (!existingIds.has(exam.id)) {
+                        merged.push(exam);
+                    }
+                });
+                return merged;
+            });
+            setPagination({
+                count: response.count ?? 0,
+                next: Boolean(response.next),
+                previous: Boolean(response.previous),
+            });
+        } catch (err: any) {
+            if (latestRequestRef.current !== requestId) {
+                return;
+            }
+            const fallbackMessage =
+                typeof err === "string"
+                    ? err
+                    : err?.detail || err?.message || "Failed to load historical exams.";
+            setError(fallbackMessage);
+        } finally {
+            if (latestRequestRef.current === requestId) {
+                setIsLoading(false);
+            }
+        }
+    }, [debouncedSearchTerm, orderingParam, page]);
+
+    useEffect(() => {
+        fetchHistoricalExams();
+    }, [fetchHistoricalExams]);
+
+    const normalize = (v: string | number | null | undefined) => (v ?? "").toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
     const preparedExams = useMemo(() => {
         return exams.map(e => ({
@@ -64,8 +140,8 @@ export const PreviousExams = () => {
 
         if (sortField) {
             result = result.slice().sort((a, b) => {
-                let aValue: number | string = sortField === 'date' ? new Date(a.date).getTime() : a.score;
-                let bValue: number | string = sortField === 'date' ? new Date(b.date).getTime() : b.score;
+                const aValue = sortField === 'date' ? new Date(a.date).getTime() : getNumericScore(a.score);
+                const bValue = sortField === 'date' ? new Date(b.date).getTime() : getNumericScore(b.score);
                 if (sortDirection === 'asc') return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
                 return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
             });
@@ -81,6 +157,7 @@ export const PreviousExams = () => {
             setSortField(field);
             setSortDirection('asc');
         }
+        setPage(1);
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,6 +185,39 @@ export const PreviousExams = () => {
         setIsSkillDropdownOpen(false);
     };
 
+    const handleRetry = () => {
+        fetchHistoricalExams();
+    };
+
+    useEffect(() => {
+        const target = loadMoreRef.current;
+        if (!target) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const first = entries[0];
+                if (first.isIntersecting && !isLoading && pagination.next && !error) {
+                    setPage((prev) => prev + 1);
+                }
+            },
+            { root: null, rootMargin: "200px", threshold: 0 }
+        );
+
+        observer.observe(target);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [isLoading, pagination.next, error]);
+
+    const handleOpenLink = (url?: string | null, fallbackMessage?: string) => {
+        if (!url) {
+            toast.error(fallbackMessage ?? "Link not available yet.");
+            return;
+        }
+        window.open(url, "_blank", "noopener,noreferrer");
+    };
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (isSkillDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -124,7 +234,12 @@ export const PreviousExams = () => {
         };
     }, [isSkillDropdownOpen, isSearchDropdownOpen]);
 
-    const uniqueSkills = useMemo(() => Array.from(new Set(exams.map(e => e.skill))).sort(), [exams]);
+    const uniqueSkills = useMemo(() => {
+        const skills = exams
+            .map(e => e.skill)
+            .filter((skill): skill is string => Boolean(skill));
+        return Array.from(new Set(skills)).sort();
+    }, [exams]);
 
     const searchResults = useMemo(() => {
         const q = normalize(searchTerm.trim());
@@ -132,10 +247,25 @@ export const PreviousExams = () => {
         return preparedExams.filter(pe => pe.index.includes(q)).slice(0, 8).map(pe => pe.original);
     }, [preparedExams, searchTerm]);
 
+    const noResultsMessage = useMemo(() => {
+        if (selectedSkill || debouncedSearchTerm.trim()) {
+            return "No exams match your current filters.";
+        }
+        return "No previous exams yet";
+    }, [selectedSkill, debouncedSearchTerm]);
+
+    const isInitialLoading = isLoading && exams.length === 0;
+    const isFetchingMore = isLoading && exams.length > 0;
+
     return (
         <div className="w-full h-full bg-[#F6F6FB] mt-15  rounded-[12px] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
             <h2 className="text-[16px] sm:text-[20px] font-semibold text-[#23085A]">Previous Exams</h2>
             <div className="relative w-full h-full mt-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] border border-[#F4EFFF] overflow-x-auto">
+                {isLoading && (
+                    <div className="absolute top-4 right-6 text-xs font-medium text-slate-500">
+                        {isInitialLoading ? "Loading..." : "Refreshing..."}
+                    </div>
+                )}
                 <table className="w-full text-left table-auto border-separate border-spacing-0">
                     <thead>
                         <tr>
@@ -229,6 +359,7 @@ export const PreviousExams = () => {
                                                             setSearchTerm(r.topic);
                                                             setDebouncedSearchTerm(r.topic);
                                                             setIsSearchDropdownOpen(false);
+                                                            setPage(1);
                                                         }}
                                                     >
                                                         <div className="flex items-center justify-between">
@@ -249,15 +380,44 @@ export const PreviousExams = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredExams.length === 0 ? (
+                        {error && exams.length === 0 ? (
                             <tr>
                                 <td className="p-6 text-center text-slate-500 border-b border-t border-[#8E92BC]" colSpan={5}>
-                                    No previous exams yet
+                                    <div className="flex flex-col items-center gap-3">
+                                        <p>{error}</p>
+                                        <button
+                                            onClick={handleRetry}
+                                            className="px-4 py-2 rounded-md bg-[#23085A] text-white text-sm font-semibold hover:bg-[#1a0643] transition-colors"
+                                        >
+                                            Try again
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : isInitialLoading ? (
+                            <tr>
+                                <td className="p-6 text-center text-slate-500 border-b border-t border-[#8E92BC]" colSpan={5}>
+                                    Loading previous exams...
+                                </td>
+                            </tr>
+                        ) : filteredExams.length === 0 ? (
+                            <tr>
+                                <td className="p-6 text-center text-slate-500 border-b border-t border-[#8E92BC]" colSpan={5}>
+                                    {noResultsMessage}
                                 </td>
                             </tr>
                         ) : (
                             filteredExams.map((exam) => {
                                 const isSelected = selectedSkill !== null && exam.skill === selectedSkill;
+                                const normalizedSkill = (exam.skill ?? "").toLowerCase();
+                                const parsedScore = typeof exam.score === "number" ? exam.score : Number.parseFloat(exam.score);
+                                const scoreDisplay = Number.isFinite(parsedScore)
+                                    ? parsedScore.toFixed(1)
+                                    : typeof exam.score === "string"
+                                        ? exam.score
+                                        : "--";
+                                const hasFinalAnswer = Boolean(exam.final_answer);
+                                const hasReport = Boolean(exam.full_report_url);
                                 return (
                                     <tr key={exam.id} className={`h-8 transition-colors ${isSelected ? 'bg-[#EFECF5] hover:bg-[#E1D4F0]' : 'hover:bg-slate-50'}`}>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-start">
@@ -267,31 +427,23 @@ export const PreviousExams = () => {
                                         </td>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-start">
                                             <div className="flex items-center justify-start gap-2">
-                                                {
-                                                    exam.skill === "Reading" && (
-                                                        <ReadingIcon className="w-6 text-[#23085A]" />
-                                                    )
-                                                }
-                                                {
-                                                    exam.skill === "Writing" && (
-                                                        <PenIcon className="w-5 h-5 text-[#23085A]" />
-                                                    )
-                                                }
-                                                {
-                                                    exam.skill === "Listening" && (
-                                                        <ListeningIcon className="w-6 text-[#23085A]" />
-                                                    )
-                                                }
-                                                {
-                                                    exam.skill === "Speaking" && (
-                                                        <SpeakingIcon className="w-6 h-6 text-[#23085A]" />
-                                                    )
-                                                }
+                                                {normalizedSkill === "reading" && (
+                                                    <ReadingIcon className="w-6 text-[#23085A]" />
+                                                )}
+                                                {normalizedSkill === "writing" && (
+                                                    <PenIcon className="w-5 h-5 text-[#23085A]" />
+                                                )}
+                                                {normalizedSkill === "listening" && (
+                                                    <ListeningIcon className="w-6 text-[#23085A]" />
+                                                )}
+                                                {normalizedSkill === "speaking" && (
+                                                    <SpeakingIcon className="w-6 h-6 text-[#23085A]" />
+                                                )}
                                             </div>
                                         </td>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-left">
                                             <div className="flex items-center justify-start gap-2">
-                                                <span className="text-[14px] sm:text-[16.25px] text-slate-800">{exam.score}</span>
+                                                <span className="text-[14px] sm:text-[16.25px] text-slate-800">{scoreDisplay ?? "--"}</span>
                                             </div>
                                         </td>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-left">
@@ -301,17 +453,19 @@ export const PreviousExams = () => {
                                         </td>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-left">
                                             <div className="flex items-center justify-start gap-2 flex-wrap sm:flex-nowrap">
-                                                <div className="flex items-center gap-2  p-[1px] cursor-pointer rounded-[9px] w-full sm:w-auto">
+                                                <div className="flex items-center gap-2  p-[1px] rounded-[9px] w-full sm:w-auto">
                                                     <button
-                                                        className="w-full sm:w-auto px-4 sm:px-[57px] py-2 text-[14px] sm:text-[16.25px] bg-[#F4EFFF] border-[1px] border-[#00000033] text-[#23085A] rounded-[8px] cursor-pointer hover:bg-purple-200 transition-colors"
-                                                        onClick={() => console.log('View Q/A/Feedback for exam:', exam.id)}
+                                                        className={`w-full sm:w-auto px-4 sm:px-[57px] py-2 text-[14px] sm:text-[16.25px] bg-[#F4EFFF] border-[1px] border-[#00000033] text-[#23085A] rounded-[8px] transition-colors ${hasFinalAnswer ? 'hover:bg-purple-200 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                                                        onClick={() => hasFinalAnswer && handleOpenLink(exam.final_answer, "Answer summary not available yet.")}
+                                                        disabled={!hasFinalAnswer}
                                                     >
                                                         View
                                                     </button>
                                                 </div>
                                                 <button
-                                                    className="w-full sm:w-auto flex items-center justify-start gap-2 px-3 sm:px-[30px] py-2 text-[14px] sm:text-[16.25px] bg-[#F2F2F4] text-[#23085A] font-bold cursor-pointer rounded-md hover:bg-gray-200 transition-colors"
-                                                    onClick={() => console.log('Get Full Report for exam:', exam.id)}
+                                                    className={`w-full sm:w-auto flex items-center justify-start gap-2 px-3 sm:px-[30px] py-2 text-[14px] sm:text-[16.25px] bg-[#F2F2F4] text-[#23085A] font-bold rounded-md transition-colors ${hasReport ? 'hover:bg-gray-200 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                                                    onClick={() => hasReport && handleOpenLink(exam.full_report_url, "Full report not available yet.")}
+                                                    disabled={!hasReport}
                                                 >
                                                     Full Report
                                                     <MapIcon />
@@ -325,6 +479,46 @@ export const PreviousExams = () => {
                     </tbody>
                 </table>
             </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mt-4 text-sm text-slate-600">
+                {/* <p>
+                    {pagination.count
+                        ? `Loaded ${Math.min(exams.length, pagination.count)} of ${pagination.count} exam${pagination.count === 1 ? '' : 's'}`
+                        : exams.length
+                            ? `Loaded ${exams.length} exam${exams.length === 1 ? '' : 's'}`
+                            : 'No exams found'}
+                    {filteredExams.length
+                        ? ` · ${filteredExams.length} visible${selectedSkill ? ` for ${selectedSkill}` : ''}`
+                        : ''}
+                </p>
+                <span className="text-xs text-slate-500">
+                    {pagination.next
+                        ? "More results will load automatically"
+                        : exams.length
+                            ? "End of results"
+                            : ""}
+                </span> */}
+            </div>
+            {/* <div
+                ref={loadMoreRef}
+                className="mt-2 h-12 flex items-center justify-center text-xs text-slate-500"
+            >
+                {error && exams.length > 0 ? (
+                    <button
+                        onClick={handleRetry}
+                        className="px-3 py-1.5 rounded-md border border-[#D7D5E4] text-[#23085A] text-xs font-medium hover:bg-[#EFECF5] transition-colors"
+                    >
+                        Couldn’t load more. Tap to retry.
+                    </button>
+                ) : isFetchingMore ? (
+                    "Loading more exams..."
+                ) : pagination.next ? (
+                    "Scroll to load more"
+                ) : exams.length ? (
+                    "You're all caught up."
+                ) : (
+                    ""
+                )}
+            </div> */}
         </div>
 
 

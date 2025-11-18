@@ -11,4 +11,5 @@ export enum EndpointEnum {
   badges = "/v1/users/badges/",
   scores = "/v1/users/scores/",
   challenges = "/v1/users/challenges/",
+  historicalExams = "/v1/users/historical-exams/",
 }

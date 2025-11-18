@@ -3,7 +3,7 @@
 import Image from "next/image";
 import useSubmitAnswer from "./useSubmitAnswer";
 import { Button } from "@/components/atom/button";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Textarea } from "@/components/atom/textarea";
 import {
   AlertDialog,
@@ -62,30 +62,47 @@ const SubmitAnswer = () => {
     setShowAlert(false);
     if (setError) setError("");
   };
+  console.log("data", data)
+  console.log("uploadResponse", uploadResponse)
+  console.log("question", question)
+  const isQuestionReady =
+    !!(uploadResponse || question || image || data?.question || data?.question_path);
+
+  const [waitForQuestionToSubmit, setWaitForQuestionToSubmit] = useState(false);
+
+  useEffect(() => {
+    if (waitForQuestionToSubmit && !isPending && isQuestionReady) {
+      handleSubmit();
+      setWaitForQuestionToSubmit(false);
+    }
+  }, [waitForQuestionToSubmit, isPending, isQuestionReady, handleSubmit, data]);
 
   return (
     <div className="w-full flex lg:flex-row flex-col gap-10">
       <div className="w-full flex flex-col gap-10">
-        <div className="text-[#414141 font-semibold] flex flex-col gap-2">
+        <div className="text-[#414141] font-semibold flex flex-col gap-2">
           <h2 className="md:text-[20px] font-bold text-[18px]">
             Your Question
           </h2>
-          {uploadResponse ||
-            (question && (
-              <div
-                className="mt-4 md:text-[18px] text-[16px] !font-bold break-all max-w-[1000px]"
-                dangerouslySetInnerHTML={{ __html: uploadResponse || question }}
-              />
-            ))}
+          {isPending && !isQuestionReady ? (
+            <p className="mt-4 md:text-[18px] text-[16px] !font-bold">Loading ...</p>
+          ) : (uploadResponse || question || data?.question) ? (
+            <div
+              className="mt-4 md:text-[18px] text-[16px] !font-bold break-all max-w-[1000px]"
+              dangerouslySetInnerHTML={{
+                __html: (uploadResponse || question || data?.question) as string,
+              }}
+            />
+          ) : null}
         </div>
 
-        {!!data?.question && (
+        {!!data?.question_path && (
           <div className="text-[#414141] font-bold text-[20px]">
-            {isPending ? (
+            {isPending && !isQuestionReady ? (
               <p>Loading ...</p>
             ) : (
               <Image
-                src={data?.question}
+                src={data?.question_path}
                 width={800}
                 height={400}
                 alt="Uploaded image"
@@ -341,10 +358,18 @@ const SubmitAnswer = () => {
 
               <AlertDialogAction
                 className="min-w-[180px] h-[50px] rounded-md flex justify-center items-center gap-3"
-                onClick={() => handleSubmit()}
+                onClick={() => {
+                  if (!isQuestionReady && isPending) {
+                    setWaitForQuestionToSubmit(true);
+                    return;
+                  }
+                  handleSubmit();
+                }}
               >
                 Yes
-                {submitPending && <Loader size={20} />}
+                {(submitPending || (waitForQuestionToSubmit && isPending)) && (
+                  <Loader size={20} />
+                )}
               </AlertDialogAction>
             </div>
           </AlertDialogFooter>

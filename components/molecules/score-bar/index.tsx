@@ -23,6 +23,7 @@ type ScoreBarProps = {
 
 export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
     const scores = useAppSelector((s: RootState) => s.scores.data);
+    console.log("scores", scores)
     const tabs = [
 
         {
@@ -31,7 +32,7 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
             buttonTitle: "Writing",
             subTitle: "Keep your prep moving",
             icon: <PenIcon className={`w-[20px] h-[20px]`} />,
-            score: scores?.writing_score || 0,
+            score: scores?.writing || 0,
         },
         {
             id: 2,
@@ -39,7 +40,7 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
             buttonTitle: "Reading",
             subTitle: "Keep your prep moving",
             icon: <ReadingIcon className={`w-[20px] h-[20px]`} />,
-            score: scores?.reading_score || 0,
+            score: scores?.reading || 0,
         },
         {
             id: 3,
@@ -47,7 +48,7 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
             buttonTitle: "Listening",
             subTitle: "Keep your prep moving",
             icon: <ListeningIcon className={`w-[20px] h-[20px]`} />,
-            score: scores?.listening_score || 0,
+            score: scores?.listening || 0,
         },
         {
             id: 4,
@@ -55,7 +56,7 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
             buttonTitle: "Speaking",
             subTitle: "Keep your prep moving",
             icon: <SpeakingIcon className={`w-[22px] h-[22px]`} />,
-            score: scores?.speaking_score || 0,
+            score: scores?.speaking || 0,
         }
     ]
     const activities = [

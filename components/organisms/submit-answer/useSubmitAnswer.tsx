@@ -41,7 +41,6 @@ const useSubmitAnswer = () => {
       questionService.getQuestions(data),
   });
 
-
   const { mutate: chatQuestion, isPending: get_chat_questions_pending } =
     useMutation({
       mutationKey: ["get_chat_questions"],
@@ -196,7 +195,7 @@ const useSubmitAnswer = () => {
       payload.answer_file_type = answerImage?.type;
     }
     setGeneratedQuestion({
-      file: data?.question || image || undefined,
+      file: data?.question_path || image || undefined,
       text: uploadResponse,
       answer: answer,
       answerFile: answerImage,
