@@ -37,7 +37,7 @@ const Dashboard = () => {
 
     return (
         <div className="w-full flex flex-col text-[#23085A]">
-            <h2 className="text-[36px] font-semibold">My compass shows the way forward</h2>
+            <h2 className="text-[36px] font-semibold capitalize">My Compass Shows The Way Forward</h2>
             <div className="w-full">
                 <ScoreBar selectedTab={selectedTab} onSelectTab={setSelectedTab} />
                 <RecentActivities selectedTab={selectedTab} />

@@ -15,7 +15,7 @@ const Navbar = () => {
     },
     {
       id: 2,
-      name: "Make it better",
+      name: "Make It Better",
       href: "/make-it-better",
     },
     {
@@ -25,7 +25,7 @@ const Navbar = () => {
     },
     {
       id: 4,
-      name: "Who we are",
+      name: "Who We Are",
       href: "/who-we-are",
     }
 
@@ -37,7 +37,7 @@ const Navbar = () => {
   return (
     <div className="bg-transparent w-full h-16 px-6 py-[40px]">
       <nav className="w-full h-[81px] bg-[#E8E8E8] rounded-[10px] relative flex justify-between items-center px-4">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 ml-3">
           <Logo />
         </div>
         <div className="flex items-center space-x-[60px]">

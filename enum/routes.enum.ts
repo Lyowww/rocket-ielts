@@ -13,4 +13,5 @@ export enum PrivateRouteEnum {
   test = "/test",
   uploadQues = "/upload-ques",
   chat = "/practice-chat",
+  knowYourScore = "/know-your-score",
 }

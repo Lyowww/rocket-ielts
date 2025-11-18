@@ -18,6 +18,7 @@ import { useChatStore } from "@/store/chat.store";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/molecules/loader";
 import useSubmitAnswer from "../submit-answer/useSubmitAnswer";
+import { PrivateRouteEnum } from "@/enum/routes.enum";
 
 const Chat = () => {
   const firstRound = useRef<number>(0);
@@ -241,7 +242,7 @@ const Chat = () => {
             <Button
               className="w-[200px] h-[56px] bg-[#F3F1FF] text-[#23085A] text-lg rounded-xl border border-[#E0E0E0]"
               style={{ boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px' }}
-              onClick={() => { router.push('/'); setShowPracticeCompleteModal(false); }}
+              onClick={() => { router.push(PrivateRouteEnum.knowYourScore); setShowPracticeCompleteModal(false); }}
             >
               Take a New Test
             </Button>
@@ -282,7 +283,7 @@ const Chat = () => {
             <Button
               className="w-[200px] h-[56px] bg-[#F3F1FF] text-[#23085A] text-lg rounded-xl border border-[#E0E0E0]"
               style={{ boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px' }}
-              onClick={() => { router.push('/'); setShowPracticeCompleteModal(false); }}
+              onClick={() => { router.push(PrivateRouteEnum.knowYourScore); setShowPracticeCompleteModal(false); }}
             >
               Take a New Test
             </Button>

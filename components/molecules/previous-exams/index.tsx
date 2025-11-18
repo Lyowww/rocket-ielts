@@ -210,9 +210,6 @@ export const PreviousExams = () => {
                                             onFocus={() => setIsSearchDropdownOpen(searchTerm.trim().length > 0)}
                                             className="bg-transparent border-none outline-none text-[14px] sm:text-[16.25px] text-slate-800 placeholder-slate-500 w-full"
                                         />
-                                        {searchTerm !== debouncedSearchTerm && (
-                                            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                                        )}
                                         {searchTerm && (
                                             <button
                                                 onClick={clearSearch}

@@ -32,7 +32,7 @@ const SidebarActions = ({ isOpen, className }: SidebarActionsProps) => {
     setImage(undefined);
     setUploadResponse(undefined);
     setAnswerimage(undefined);
-    router.push(PrivateRouteEnum.test);
+    router.push(PrivateRouteEnum.knowYourScore);
   };
   return (
     <div className={`px-[18px] space-y-4 ${className || ""}`}>

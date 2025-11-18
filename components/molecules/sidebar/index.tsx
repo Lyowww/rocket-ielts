@@ -25,7 +25,7 @@ const Sidebar = ({ className }: SidebarProps) => {
         <div className={cn("flex items-start justify-between", isOpen ? "" : "items-center justify-center")}>
           <div
             className={cn(
-              "p-[31px] cursor-pointer transition-all duration-200",
+              "p-[31px] pt-18 cursor-pointer transition-all duration-200",
               !isOpen && "group"
             )}
             onClick={() => {

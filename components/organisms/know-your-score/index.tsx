@@ -43,13 +43,13 @@ const KnowYourScore = () => {
             </button>
           );
         })}
-        <button
+        {/* <button
           onClick={handleLogOut}
           className={`
                 flex items-center text-lg font-bold cursor-pointer text-[#1E1E1E] bg-[#f2f2f2] rounded-[4px] gap-[10px] px-10 py-4`}
         >
           <p>Logout</p>
-        </button>
+        </button> */}
       </div>
 
       <form

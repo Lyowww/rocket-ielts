@@ -132,16 +132,16 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
         <div className="mt-[42px] h-full w-full gap-4 flex justify-center">
             <div className="w-full h-full">
                 <div className={`w-full cursor-pointer h-[53px] gap-1 flex items-center justify-center shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] transition-all duration-300 ease-in-out ${selectedTab === 0 ? "bg-[#23085A] text-white" : "bg-[#F6F6FB] text-black"} rounded-[10px]`} onClick={() => onSelectTab(0)}>
-                    <DiagramIcon className={`transition-colors duration-300 ease-in-out ${selectedTab === 0 ? "text-white" : "text-black"}`} />
-                    <p className={`transition-colors duration-300 ease-in-out text-[${selectedTab === 0 ? "#FFFFFF" : "#1E1E1E"}] text-[20px] font-medium`}>Overall Score: {scores?.overall_score ? scores?.overall_score.toFixed(1) : "0.0"}</p>
+                    <DiagramIcon className={`transition-colors duration-300 ease-in-out ${selectedTab === 0 ? "text-white" : "text-[#23085a]"}`} />
+                    <p className={`transition-colors duration-300 ease-in-out text-[${selectedTab === 0 ? "#FFFFFF" : "#23085a"}] text-[20px] font-medium`}>Overall Score: {scores?.overall_score ? scores?.overall_score.toFixed(1) : "0.0"}</p>
                 </div>
                 <div className="gap-4 grid grid-cols-2 mt-6">
                     {tabs.map((el) => {
                         return (
-                            <button key={el.id} onClick={() => onSelectTab(el.id)} className={`transition-all duration-300 ease-in-out ${selectedTab === el.id ? "bg-[#23085A] text-white" : "bg-[#F6F6FB] text-black"} flex flex-col items-center text-[23px] font-medium cursor-pointer text-[#1E1E1E] rounded-[12px] py-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]`}>
+                            <button key={el.id} onClick={() => onSelectTab(el.id)} className={`transition-all duration-300 ease-in-out ${selectedTab === el.id ? "bg-[#23085A] text-white" : "bg-[#F6F6FB] text-[#23085a]"} flex flex-col items-center text-[23px] font-medium cursor-pointer text-[#1E1E1E] rounded-[12px] py-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]`}>
                                 <div className="flex items-center gap-4">
-                                    <div className={`transition-all duration-300 ease-in-out rounded-[12px] p-3 bg-[#F6F6FB] text-black shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]`}>{el.icon}</div>
-                                    <p className={`transition-colors duration-300 ease-in-out text-[24px] text-[#575353] ${selectedTab === el.id ? "text-white" : "text-[#575353]"}`}>
+                                    <div className={`transition-all duration-300 ease-in-out rounded-[12px] p-3 bg-[#F6F6FB] text-[#23085a] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]`}>{el.icon}</div>
+                                    <p className={`transition-colors duration-300 ease-in-out text-[24px] ${selectedTab === el.id ? "text-white" : "text-[#23085a]"}`}>
                                         {typeof el.score === "number" ? el.score.toFixed(1) : "--"}
                                     </p>
                                 </div>
@@ -151,14 +151,14 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
                 </div>
             </div>
             <div className="w-full flex flex-col items-center justify-center gap-2 h-[262px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] bg-[#F7F7F8] rounded-[12px] p-6">
-                <div className="flex items-center justify-center gap-2 mt-2">
+                <div className="flex items-center justify-center gap-2">
                     <h2 className="text-[16px] text-[#23085A] font-bold flex">Milestones </h2>
                     <AchievementIcon className="w-[11px] h-[15px] text-[#23085A]" />
                 </div>
-                <div className="flex items-center justify-start mt-3 flex-wrap gap-1">
-                    {[...milestones.slice(0, 3), ...milestones.slice(0, 3)].map((el, index) => (
-                        <div key={index}>
-                            <MilestoneIcon title={el.title} icon={el.icon} disabled={el.disabled} className="w-[104px] h-[79px] text-[#23085A] inline-block" />
+                <div className="grid grid-cols-3 gap-2 place-items-center">
+                    {milestones.slice(0, 6).map((el, index) => (
+                        <div key={index} className="flex items-center justify-center">
+                            <MilestoneIcon title={el.title} icon={el.icon} disabled={el.disabled} className="w-[96px] h-[72px] text-[#23085A]" />
                         </div>
                     ))}
                 </div>
