@@ -141,7 +141,7 @@ const SubmitAnswer = () => {
           ) : null}
         </div>
 
-        {!!data?.question_path && (
+        {/* {!!data?.question_path && (
           <div className="text-[#414141] font-bold text-[20px]">
             {isPending && !isQuestionReady ? (
               <p>Loading ...</p>
@@ -166,7 +166,7 @@ const SubmitAnswer = () => {
               className="rounded"
             />
           </div>
-        )}
+        )} */}
         {showResults && (
           <div className="border-[1px] bg-white border-[#C8C8C8] rounded-[4px] px-3 py-4">
             <h2 className="md:text-[20px] font-bold text-[18px]">
