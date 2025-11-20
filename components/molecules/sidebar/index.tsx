@@ -21,7 +21,7 @@ const Sidebar = ({ className }: SidebarProps) => {
         className
       )}
     >
-      <div className="flex h-full flex-col gap-[55px]">
+      <div className="flex h-full flex-col gap-[12px]">
         <div className={cn("flex items-start justify-between", isOpen ? "" : "items-center justify-center")}>
           <div
             className={cn(
