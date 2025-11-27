@@ -79,6 +79,7 @@ export const RecentActivities = ({ selectedTab }: RecentActivitiesProps) => {
 
     const hasRoadblock = Boolean(activeChallenge);
     const currentScore = activeTab.score ?? overallScore;
+    const scores = useAppSelector((s: RootState) => s.scores.data);
     const roadblockDescription =
         activeChallenge?.current_feedback?.trim() ||
         activeChallenge?.motivational_text?.trim() ||
@@ -88,11 +89,12 @@ export const RecentActivities = ({ selectedTab }: RecentActivitiesProps) => {
         activeChallenge?.exercise_question?.trim() ||
         "Keep practicing to unlock your next milestone";
     const RoadblockIcon = activeTab.icon ?? <ReadingIcon className="w-[20px] h-[22px] text-[#23085A]" />;
+    console.log("scores", scores);
     return (
-        <div className="w-full h-[345px] mt-[40px] gap-4 flex">
-            <div className="w-2/3 gap-4 h-full bg-[#F6F6FB] rounded-[12px] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex flex-col items-start justify-start overflow-hidden">
+        <div className="mt-10 flex w-full flex-col gap-4 lg:flex-row">
+            <div className="flex w-full flex-1 flex-col gap-4 rounded-[12px] bg-[#F6F6FB] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
                 {activeTab.icon ? (
-                    <div className="transition-all duration-300 ease-in-out inline-flex items-center justify-center p-3 rounded-[12px] bg-[#F6F6FB] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] text-[#23085A] shrink-0">
+                    <div className="transition-all w-fit duration-300 ease-in-out inline-flex items-center justify-center p-3 rounded-[12px] bg-[#F6F6FB] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] text-[#23085A] shrink-0">
                         {activeTab.icon}
                     </div>
                 ) : (
@@ -100,13 +102,16 @@ export const RecentActivities = ({ selectedTab }: RecentActivitiesProps) => {
                         {activeTab.title}
                     </p>
                 )}
-                <div className="w-full flex-1 min-h-0 overflow-hidden">
-                    <div className="w-full h-full">
-                        <ScoreMap currentScore={currentScore} maxScore={maxScore} />
+                {/* <div className="w-full flex-1 min-h-[220px] overflow-hidden flex items-center justify-center">
+                    <div className="w-full h-full flex items-center justify-center">
+                        <p className="text-sm text-[#999]">[Placeholder for user progress chart]</p>
                     </div>
-                </div>
+                            />
+                        </AgChartView>
+                    </div>
+                </div> */}
             </div>
-            <div className="w-1/3 h-full shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] bg-[#F7F7F8] rounded-[12px] p-6">
+            <div className="w-full rounded-[12px] bg-[#F7F7F8] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] lg:w-1/3">
                 <div className="flex items-center w-full justify-between">
                     <h2 className="text-[20px] text-[#23085A] font-semibold">Current Roadblock</h2>
                     <div className="inline-flex items-center justify-center p-2 rounded-[12px] bg-[#E8E8E8] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] text-[#23085A] shrink-0">{RoadblockIcon}</div>

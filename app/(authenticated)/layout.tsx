@@ -12,13 +12,16 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="w-full h-full min-h-screen bg-[#F0F0F0]">
       <ReduxProvider>
-        <Sidebar />
-        <div className={cn(
-          "transition-all duration-300 ease-in-out",
-          isOpen ? "ml-[279px]" : "ml-[112px]"
-        )}>
+        <Sidebar className="hidden lg:block" />
+        <div
+          className={cn(
+            "min-h-screen transition-all duration-300 ease-in-out",
+            "lg:ml-[112px]",
+            isOpen && "lg:ml-[279px]"
+          )}
+        >
           <Navbar />
-          <main className="p-6 pt-[90px]">
+          <main className="p-4 pt-[80px] sm:p-6 sm:pt-[90px]">
             {children}
           </main>
         </div>

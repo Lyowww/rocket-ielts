@@ -32,23 +32,28 @@ const NavbarUserProfile = ({ className }: NavbarUserProfileProps) => {
   };
   return (
     <div className={cn("flex items-center relative gap-2", className)}>
-      <div className="flex items-center justify-center gap-2 cursor-pointer"
+      <button
+        type="button"
+        className="flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#23085A]/40 rounded-full"
         onClick={() => {
           setIsOpen(!isOpen);
-        }}>
-        <div className="w-13 h-13 relative bg-gray-300 rounded-full flex items-center justify-center w-">
-          <img src={user?.avatar || DefaultAvatar.src} alt="Profile Picture" className="rounded-full w-13 h-13 w-full h-full" />
+        }}
+      >
+        <div className="relative bg-gray-300 rounded-full flex items-center justify-center w-10 h-10 sm:w-13 sm:h-13">
+          <img src={user?.avatar || DefaultAvatar.src} alt="Profile Picture" className="rounded-full w-full h-full object-cover" />
         </div>
-        <p className="text-[16px] text-[#23085A] font-medium">{user?.user_name}</p>
+        <p className="hidden sm:block text-[16px] text-[#23085A] font-medium truncate max-w-[160px]">
+          {user?.user_name}
+        </p>
 
-        <div className="flex items-center justify-center w-[25px] h-[25px]">
+        <div className="hidden sm:flex items-center justify-center w-[25px] h-[25px]">
           <ArrowDown className={cn("cursor-pointer transition-transform duration-300", isOpen ? "rotate-180 " : "")} />
         </div>
-      </div>
+      </button>
       {isOpen && (
-        <div className="absolute top-13 rounded-sm shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] right-0 bg-white">
+        <div className="absolute top-13 rounded-sm shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] right-0 bg-white z-50 w-[180px]">
           <div
-            className="flex gap-2 cursor-pointer items-center justify-center px-12 py-3 hover:bg-gray-100 hover:text-[#23085A] text-black"
+            className="flex gap-2 cursor-pointer items-center justify-center px-6 py-3 hover:bg-gray-100 hover:text-[#23085A] text-black"
             onClick={handleLogout}
           >
             <LogOutIcon className="w-5 h-5" />

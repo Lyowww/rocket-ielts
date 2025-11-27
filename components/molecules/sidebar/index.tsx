@@ -4,7 +4,6 @@ import { useSidebarStore } from "@/store/sidebar.store";
 import { cn } from "@/lib/utils";
 import SidebarNavigation from "../sidebar-navigation";
 import SidebarActions from "../sidebar-actions";
-import { Logo } from "@/assets/icons/Logo";
 import { CloseSideBarIcon } from "@/assets/icons/CloseSideBarIcon";
 
 interface SidebarProps {
@@ -22,26 +21,25 @@ const Sidebar = ({ className }: SidebarProps) => {
       )}
     >
       <div className="flex h-full flex-col gap-[12px]">
-        <div className={cn("flex items-start justify-between", isOpen ? "" : "items-center justify-center")}>
-          <div
+        <div className={cn("flex items-start justify-end", isOpen ? "px-4 pt-6" : "px-3 pt-6")}>
+          <button
+            type="button"
+            aria-label="Toggle sidebar width"
             className={cn(
-              "p-[31px] pt-18 cursor-pointer transition-all duration-200",
-              !isOpen && "group"
+              "p-2 rounded-full text-[#23085A] transition-colors duration-200 hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#23085A]/40"
             )}
-            onClick={() => {
-              toggleSidebar();
-            }}
+            onClick={toggleSidebar}
           >
-            <CloseSideBarIcon className="" />
-          </div>
+            <CloseSideBarIcon className={cn(!isOpen && "rotate-180")} />
+          </button>
         </div>
 
-        <div className="flex flex-col gap-[73px]">
+        <div className="flex flex-col gap-[40px] overflow-y-auto pb-6 scrollbar-23085A">
           <SidebarNavigation isOpen={isOpen} />
           <SidebarActions isOpen={isOpen} />
         </div>
       </div>
-    </aside >
+    </aside>
   );
 };
 

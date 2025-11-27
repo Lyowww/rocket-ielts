@@ -49,6 +49,34 @@ export const PreviousExams = () => {
         return Number.isNaN(parsed) ? 0 : parsed;
     };
 
+    const getScoreDisplay = (score: ExamData["score"]) => {
+        const parsedScore = typeof score === "number" ? score : Number.parseFloat(score);
+        if (Number.isFinite(parsedScore)) {
+            return parsedScore.toFixed(1);
+        }
+        if (typeof score === "string") {
+            return score;
+        }
+        return "--";
+    };
+
+    const getSkillIcon = (skill: string | null | undefined) => {
+        const normalizedSkill = (skill ?? "").toLowerCase();
+        if (normalizedSkill === "reading") {
+            return <ReadingIcon className="w-6 text-[#23085A]" />;
+        }
+        if (normalizedSkill === "writing") {
+            return <PenIcon className="w-5 h-5 text-[#23085A]" />;
+        }
+        if (normalizedSkill === "listening") {
+            return <ListeningIcon className="w-6 text-[#23085A]" />;
+        }
+        if (normalizedSkill === "speaking") {
+            return <SpeakingIcon className="w-6 h-6 text-[#23085A]" />;
+        }
+        return null;
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
@@ -260,13 +288,13 @@ export const PreviousExams = () => {
     return (
         <div className="w-full h-full bg-[#F6F6FB] mt-15  rounded-[12px] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
             <h2 className="text-[16px] sm:text-[20px] font-semibold text-[#23085A]">Previous Exams</h2>
-            <div className="relative w-full h-full mt-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] border border-[#F4EFFF] overflow-x-auto">
+        <div className="relative w-full h-full mt-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] border border-[#F4EFFF] overflow-x-auto hidden sm:block">
                 {isLoading && (
                     <div className="absolute top-4 right-6 text-xs font-medium text-slate-500">
                         {isInitialLoading ? "Loading..." : "Refreshing..."}
                     </div>
                 )}
-                <table className="w-full text-left table-auto border-separate border-spacing-0">
+                <table className="w-full min-w-[720px] text-left table-auto border-separate border-spacing-0 text-xs sm:text-sm">
                     <thead>
                         <tr>
                             <th
@@ -409,15 +437,10 @@ export const PreviousExams = () => {
                         ) : (
                             filteredExams.map((exam) => {
                                 const isSelected = selectedSkill !== null && exam.skill === selectedSkill;
-                                const normalizedSkill = (exam.skill ?? "").toLowerCase();
-                                const parsedScore = typeof exam.score === "number" ? exam.score : Number.parseFloat(exam.score);
-                                const scoreDisplay = Number.isFinite(parsedScore)
-                                    ? parsedScore.toFixed(1)
-                                    : typeof exam.score === "string"
-                                        ? exam.score
-                                        : "--";
+                                const scoreDisplay = getScoreDisplay(exam.score);
                                 const hasFinalAnswer = Boolean(exam.final_answer);
                                 const hasReport = Boolean(exam.full_report_url);
+                                const skillIcon = getSkillIcon(exam.skill);
                                 return (
                                     <tr key={exam.id} className={`h-8 transition-colors ${isSelected ? 'bg-[#EFECF5] hover:bg-[#E1D4F0]' : 'hover:bg-slate-50'}`}>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-start">
@@ -427,18 +450,7 @@ export const PreviousExams = () => {
                                         </td>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-start">
                                             <div className="flex items-center justify-start gap-2">
-                                                {normalizedSkill === "reading" && (
-                                                    <ReadingIcon className="w-6 text-[#23085A]" />
-                                                )}
-                                                {normalizedSkill === "writing" && (
-                                                    <PenIcon className="w-5 h-5 text-[#23085A]" />
-                                                )}
-                                                {normalizedSkill === "listening" && (
-                                                    <ListeningIcon className="w-6 text-[#23085A]" />
-                                                )}
-                                                {normalizedSkill === "speaking" && (
-                                                    <SpeakingIcon className="w-6 h-6 text-[#23085A]" />
-                                                )}
+                                                {skillIcon}
                                             </div>
                                         </td>
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-left">
@@ -519,8 +531,77 @@ export const PreviousExams = () => {
                     ""
                 )}
             </div> */}
+        <div className="sm:hidden mt-6 space-y-4">
+            {error && exams.length === 0 ? (
+                <div className="rounded-2xl border border-[#8E92BC] bg-white p-5 text-center text-slate-600 shadow-sm">
+                    <p className="mb-3">{error}</p>
+                    <button
+                        onClick={handleRetry}
+                        className="w-full rounded-xl bg-[#23085A] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-[#1a0643] transition-colors"
+                    >
+                        Try again
+                    </button>
+                </div>
+            ) : isInitialLoading ? (
+                <div className="rounded-2xl border border-[#8E92BC] bg-white p-5 text-center text-slate-600 shadow-sm">
+                    Loading previous exams...
+                </div>
+            ) : filteredExams.length === 0 ? (
+                <div className="rounded-2xl border border-[#8E92BC] bg-white p-5 text-center text-slate-600 shadow-sm">
+                    {noResultsMessage}
+                </div>
+            ) : (
+                filteredExams.map((exam) => {
+                    const scoreDisplay = getScoreDisplay(exam.score);
+                    const hasFinalAnswer = Boolean(exam.final_answer);
+                    const hasReport = Boolean(exam.full_report_url);
+                    const skillIcon = getSkillIcon(exam.skill);
+                    return (
+                        <div
+                            key={exam.id}
+                            className="rounded-2xl border border-[#F4EFFF] bg-white p-5 shadow-[0px_8px_24px_rgba(35,8,90,0.08)]"
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-[11px] uppercase tracking-wide text-slate-500">Date</p>
+                                    <p className="text-lg font-semibold text-[#23085A]">{exam.date}</p>
+                                </div>
+                                <div className="flex items-center gap-2 rounded-full bg-[#F4EFFF] px-3 py-1 text-[#23085A]">
+                                    {skillIcon}
+                                    <span className="text-sm font-semibold">{exam.skill ?? "N/A"}</span>
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <p className="text-[11px] uppercase tracking-wide text-slate-500">Topic</p>
+                                <p className="mt-1 text-base font-semibold text-slate-800">{exam.topic}</p>
+                            </div>
+                            <div className="mt-4 rounded-2xl border border-[#F4EFFF] bg-[#EFECF5] px-4 py-3">
+                                <p className="text-[11px] uppercase tracking-wide text-slate-500">Score</p>
+                                <p className="text-3xl font-bold text-[#23085A]">{scoreDisplay ?? "--"}</p>
+                                <p className="text-xs text-slate-500">Band result</p>
+                            </div>
+                            <div className="mt-4 flex flex-col gap-2">
+                                <button
+                                    className={`w-full rounded-xl border border-[#00000033] px-4 py-2 text-base font-semibold text-[#23085A] transition-colors ${hasFinalAnswer ? 'bg-[#F4EFFF] hover:bg-[#e0d3ff]' : 'bg-[#F4EFFF] opacity-50 cursor-not-allowed'}`}
+                                    onClick={() => hasFinalAnswer && handleOpenLink(exam.final_answer, "Answer summary not available yet.")}
+                                    disabled={!hasFinalAnswer}
+                                >
+                                    View Answers
+                                </button>
+                                <button
+                                    className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-colors ${hasReport ? 'bg-[#23085A] text-white hover:bg-[#1a0643]' : 'bg-[#F2F2F4] text-[#23085A] opacity-50 cursor-not-allowed'}`}
+                                    onClick={() => hasReport && handleOpenLink(exam.full_report_url, "Full report not available yet.")}
+                                    disabled={!hasReport}
+                                >
+                                    Full Report
+                                    <MapIcon />
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })
+            )}
         </div>
-
-
-    )
-}
+    </div>
+    );
+};

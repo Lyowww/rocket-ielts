@@ -9,12 +9,12 @@ import { MilestoneIcon } from "@/assets/icons/MilestoneIcon";
 import { ReadingIcon } from "@/assets/icons/ReadingIcon";
 import { SpeakingIcon } from "@/assets/icons/SpeakingIcon";
 import { ProfilePicExample } from "@/assets/images";
-import { Button } from "@/components/atom/button";
 import { useAppSelector } from "@/store/rtk/hooks";
 import { RootState } from "@/store/rtk/store";
 import Image from "next/image";
 import { useState } from "react";
 import GlobalModal from "@/components/molecules/GlobalModal";
+import { cn } from "@/lib/utils";
 
 type ScoreBarProps = {
     selectedTab: number;
@@ -130,114 +130,137 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
     const hasActivities = !shouldShowEmptyActivities && activities.length > 0
 
     return (
-        <div className="mt-[42px] h-full w-full gap-4 flex justify-center">
-            <div className="w-full h-full">
-                <div className={`w-full cursor-pointer h-[53px] gap-1 flex items-center justify-center shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] transition-all duration-300 ease-in-out ${selectedTab === 0 ? "bg-[#23085A] text-white" : "bg-[#F6F6FB] text-black"} rounded-[10px]`} onClick={() => onSelectTab(0)}>
-                    <DiagramIcon className={`transition-colors duration-300 ease-in-out ${selectedTab === 0 ? "text-white" : "text-[#23085a]"}`} />
-                    <p className={`transition-colors duration-300 ease-in-out text-[${selectedTab === 0 ? "#FFFFFF" : "#23085a"}] text-[20px] font-medium`}>Overall Score: {scores?.overall_score ? scores?.overall_score.toFixed(1) : "0.0"}</p>
-                </div>
-                <div className="gap-4 grid grid-cols-2 mt-6">
-                    {tabs.map((el) => {
-                        return (
-                            <button key={el.id} onClick={() => onSelectTab(el.id)} className={`transition-all duration-300 ease-in-out ${selectedTab === el.id ? "bg-[#23085A] text-white" : "bg-[#F6F6FB] text-[#23085a]"} flex flex-col items-center text-[23px] font-medium cursor-pointer text-[#1E1E1E] rounded-[12px] py-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]`}>
+        <>
+            <div className="mt-10 flex w-full flex-col gap-6 xl:flex-row">
+                <div className="flex-1 space-y-6 w-full h-full flex flex-col">
+                    <button
+                        type="button"
+                        className={cn(
+                            "flex w-full items-center justify-center gap-3 rounded-[10px] px-4 py-4 text-base sm:text-lg font-semibold shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] transition-all duration-300",
+                            selectedTab === 0 ? "bg-[#23085A] text-white" : "bg-[#F6F6FB] text-[#23085A]"
+                        )}
+                        onClick={() => onSelectTab(0)}
+                    >
+                        <DiagramIcon className={selectedTab === 0 ? "text-white" : "text-[#23085A]"} />
+                        <span>Overall Score: {scores?.overall_score ? scores?.overall_score.toFixed(1) : "0.0"}</span>
+                    </button>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 w-full h-full">
+                        {tabs.map((el) => (
+                            <button
+                                key={el.id}
+                                onClick={() => onSelectTab(el.id)}
+                                className={cn(
+                                    "flex flex-col shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] gap-4 rounded-[12px] px-5 py-6.5 items-center justify-center text-left transition-all duration-300",
+                                    selectedTab === el.id ? "bg-[#23085A] text-white" : "bg-[#F6F6FB] text-[#23085A]"
+                                )}
+                            >
                                 <div className="flex items-center gap-4">
-                                    <div className={`transition-all duration-300 ease-in-out rounded-[12px] p-3 bg-[#F6F6FB] text-[#23085a] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]`}>{el.icon}</div>
-                                    <p className={`transition-colors duration-300 ease-in-out text-[24px] ${selectedTab === el.id ? "text-white" : "text-[#23085a]"}`}>
+                                    <div className="rounded-[12px] bg-white p-3 text-[#23085A] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+                                        {el.icon}
+                                    </div>
+                                    <p className="text-3xl font-semibold">
                                         {typeof el.score === "number" ? el.score.toFixed(1) : "--"}
                                     </p>
                                 </div>
                             </button>
-                        )
-                    })}
+                        ))}
+                    </div>
                 </div>
-            </div>
-            <div className="w-full flex flex-col items-center justify-center gap-2 h-[262px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] bg-[#F7F7F8] rounded-[12px] p-6">
-                <div className="flex items-center justify-center gap-2">
-                    <h2 className="text-[16px] text-[#23085A] font-bold flex">Milestones </h2>
-                    <AchievementIcon className="w-[11px] h-[15px] text-[#23085A]" />
-                </div>
-                <div className="grid grid-cols-3 gap-2 place-items-center">
-                    {milestones.slice(0, 6).map((el, index) => (
-                        <div key={index} className="flex items-center justify-center">
-                            <MilestoneIcon title={el.title} icon={el.icon} disabled={el.disabled} className="w-[96px] h-[72px] text-[#23085A]" />
+
+                <div className="flex w-full flex-col xl:flex-row gap-4 xl:w-2/3">
+                    <div className="w-full flex flex-col gap-4 rounded-[12px] bg-[#F7F7F8] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+                        <div className="flex items-center justify-center gap-2">
+                            <h2 className="text-base font-bold text-[#23085A]">Milestones</h2>
+                            <AchievementIcon className="h-[15px] w-[11px] text-[#23085A]" />
                         </div>
-                    ))}
-                </div>
-                <div onClick={() => setIsMilestonesOpen(true)} className="text-[12px] font-medium w-[95px] h-[27px] flex items-center justify-center text-center cursor-pointer bg-[#EFECF5] rounded-[8px] px-4 py-2 border border-[#00000033]">
-                    <span className="text-[#23085A] font-medium">View All</span>
-                </div>
-            </div>
-            <div className="w-full h-[262px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] bg-[#F7F7F8] rounded-[12px] p-6">
-                {hasActivities ? (
-                    <>
-                        <div className="overflow-hidden w-full">
-                            <div
-                                className="flex transition-transform duration-300 ease-in-out"
-                                style={{ transform: `translateX(-${currentActivityIndex * 100}%)` }}
-                            >
-                                {activities.map((item) => (
-                                    <div key={item.id} className="min-w-full">
-                                        <div className="flex items-center gap-2">
-                                            <Image src={ProfilePicExample.src} alt="recent-activities" quality={100} priority={false} width={52} height={52} className="rounded-full w-[52px] h-[52px] object-cover object-center" />
-                                            <div className="flex flex-col">
-                                                <h4 className="text-[17px] text-[#141522] font-semibold">{item.userName}</h4>
-                                                <div className="flex items-center gap-1">
-                                                    {item.icon}
-                                                    <p className="text-[13px] text-[#666666] italic">{item.discipline}</p>
+                        <div className="grid grid-cols-3 gap-2 place-items-center">
+                            {milestones.slice(0, 6).map((el, index) => (
+                                <MilestoneIcon key={index} title={el.title} icon={el.icon} disabled={el.disabled} className="h-[72px] w-[96px] text-[#23085A]" />
+                            ))}
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setIsMilestonesOpen(true)}
+                            className="mx-auto flex h-[32px] w-[110px] items-center justify-center rounded-[8px] border border-[#00000033] bg-[#EFECF5] text-xs font-medium text-[#23085A] transition hover:opacity-80"
+                        >
+                            View All
+                        </button>
+                    </div>
+
+                    <div className="w-full rounded-[12px] bg-[#F7F7F8] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+                        {hasActivities ? (
+                            <>
+                                <div className="overflow-hidden">
+                                    <div
+                                        className="flex transition-transform duration-300 ease-in-out"
+                                        style={{ transform: `translateX(-${currentActivityIndex * 100}%)` }}
+                                    >
+                                        {activities.map((item) => (
+                                            <div key={item.id} className="min-w-full">
+                                                <div className="flex items-center gap-3">
+                                                    <Image src={ProfilePicExample.src} alt="recent-activities" quality={100} priority={false} width={52} height={52} className="h-[52px] w-[52px] rounded-full object-cover" />
+                                                    <div className="flex flex-col">
+                                                        <h4 className="text-base font-semibold text-[#141522]">{item.userName}</h4>
+                                                        <div className="flex items-center gap-1 text-sm text-[#666666]">
+                                                            {item.icon}
+                                                            <p className="italic">{item.discipline}</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
+                                                <div className="mt-4 rounded-[28px] rounded-bl-none bg-[#E8E8E8] px-5 py-3 text-xs text-[#1A1A1B]">
+                                                    <p>{item.message}</p>
+                                                </div>
+                                                <button className="mt-4 w-full rounded-[8px] border border-[#00000033] bg-[#EFECF5] py-2 text-base font-medium text-[#23085A] transition hover:bg-white/80">
+                                                    Ask For Advice
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div className="text-[11px] mt-[16.85px] text-[#1A1A1B] px-[19px] py-[12px] w-full font-regular bg-[#E8E8E8] rounded-[28.05px] rounded-bl-[0px]">
-                                            <p>{item.message}</p>
-                                        </div>
-                                        <div className="bg-[#EFECF5] mt-[16.85px] w-full border border-[#00000033] transition-300 flex items-center justify-center hover:bg-[white]/80 cursor-pointer rounded-[8px] py-[10px]">
-                                            <p className="text-[18px] text-[#23085A] font-medium">Ask For Advice</p>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="mt-4 flex items-center justify-center">
+                                    <div className="rounded-[9px] bg-[#23085A] p-1">
+                                        <div className="flex items-center gap-1 rounded-[8px] border border-[#F0F0F3] bg-white px-2 py-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCurrentActivityIndex((i) => Math.max(0, i - 1))}
+                                                className="p-1"
+                                                aria-label="Previous"
+                                            >
+                                                <LeftArrow className="h-3 w-2 text-[#23085A]" />
+                                            </button>
+                                            <div className="h-[20px] w-[1px] rounded-full shadow" />
+                                            <div className="h-[20px] w-[1px] rounded-full shadow" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setCurrentActivityIndex((i) => Math.min(activities.length - 1, i + 1))}
+                                                className="p-1"
+                                                aria-label="Next"
+                                            >
+                                                <LeftArrow className="h-3 w-2 rotate-180 text-[#23085A]" />
+                                            </button>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="w-full flex items-center justify-center mt-[10px]">
-                            <div className="bg-[#23085A] flex items-center justify-center rounded-[9px] p-[1px]">
-                                <div className="flex items-center gap-1 border border-[#F0F0F3] rounded-[8px] p-[1px] px-2 bg-white">
-                                    <button
-                                        type="button"
-                                        onClick={() => setCurrentActivityIndex((i) => Math.max(0, i - 1))}
-                                        className="cursor-pointer"
-                                        aria-label="Previous"
-                                    >
-                                        <LeftArrow className="w-[8px] h-[12px] text-[#23085A]" />
-                                    </button>
-                                    <div className="w-[1px] h-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] rounded-full" />
-                                    <div className="w-[1px] h-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.25)] rounded-full" />
-                                    <button
-                                        type="button"
-                                        onClick={() => setCurrentActivityIndex((i) => Math.min(activities.length - 1, i + 1))}
-                                        className="cursor-pointer"
-                                        aria-label="Next"
-                                    >
-                                        <LeftArrow className="w-[8px] h-[12px] text-[#23085A] rotate-180" />
-                                    </button>
                                 </div>
+                            </>
+                        ) : (
+                            <div className="flex h-full flex-col items-center justify-center text-center">
+                                <div className="text-[#23085A]">
+                                    <MessagingIcon />
+                                </div>
+                                <p className="mt-2 text-base font-semibold text-[#141522]">No recent activity yet</p>
+                                <p className="mt-1 text-xs text-[#666666]">Your feedback and activity will appear here</p>
                             </div>
-                        </div>
-                    </>
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <div className="flex flex-col items-center text-center">
-                            <div className="text-[#23085A]"><MessagingIcon /></div>
-                            <p className="text-[16px] text-[#141522] font-semibold mt-2">No recent activity yet</p>
-                            <p className="text-[12px] text-[#666666] mt-1">Your feedback and activity will appear here</p>
-                        </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
 
-            <GlobalModal className="w-[800px]" open={isMilestonesOpen} onOpenChange={setIsMilestonesOpen} isNeedBtn>
+            <GlobalModal className="w-[90vw] max-w-[800px] p-20" open={isMilestonesOpen} onOpenChange={setIsMilestonesOpen} isNeedBtn>
                 <div className="w-full">
-                    <div className="flex items-center justify-center mb-4 gap-2">
-                        <h3 className="text-[18px] text-[#23085A] font-semibold">Milestones</h3>
-                        <AchievementIcon className="w-[11px] h-[15px] text-[#23085A]" />
+                    <div className="mb-4 flex items-center justify-center gap-2">
+                        <h3 className="text-lg font-semibold text-[#23085A]">Milestones</h3>
+                        <AchievementIcon className="h-[15px] w-[11px] text-[#23085A]" />
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {[...milestones, ...milestones, ...milestones]
@@ -248,12 +271,12 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
                                     title={el.title}
                                     icon={el.icon}
                                     disabled={el.disabled}
-                                    className="w-[104px] h-[79px] text-[#23085A] inline-block"
+                                    className="inline-block h-[79px] w-[104px] text-[#23085A]"
                                 />
                             ))}
                     </div>
                 </div>
             </GlobalModal>
-        </div>
+        </>
     );
 };
