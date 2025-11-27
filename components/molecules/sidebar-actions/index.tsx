@@ -10,9 +10,10 @@ import { useQuestionOrImageStore } from "@/store/questionOrImage.store";
 interface SidebarActionsProps {
   isOpen: boolean;
   className?: string;
+  onActionComplete?: () => void;
 }
 
-const SidebarActions = ({ isOpen, className }: SidebarActionsProps) => {
+const SidebarActions = ({ isOpen, className, onActionComplete }: SidebarActionsProps) => {
   const router = useRouter();
   const {
     setExamType,
@@ -33,6 +34,7 @@ const SidebarActions = ({ isOpen, className }: SidebarActionsProps) => {
     setUploadResponse(undefined);
     setAnswerimage(undefined);
     router.push(PrivateRouteEnum.knowYourScore);
+    onActionComplete?.();
   };
   return (
     <div className={`px-[18px] space-y-4 ${className || ""}`}>

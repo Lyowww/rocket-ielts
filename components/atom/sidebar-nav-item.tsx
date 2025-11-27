@@ -12,6 +12,7 @@ interface SidebarNavItemProps {
   isActive: boolean;
   isOpen: boolean;
   className?: string;
+  onSelect?: () => void;
 }
 
 const SidebarNavItem = ({
@@ -20,7 +21,8 @@ const SidebarNavItem = ({
   icon,
   isActive,
   isOpen,
-  className
+  className,
+  onSelect
 }: SidebarNavItemProps) => {
   return (
     <Link
@@ -33,6 +35,7 @@ const SidebarNavItem = ({
         !isOpen && "justify-center",
         className
       )}
+      onClick={onSelect}
     >
       <div className="relative flex h-[36px] w-[36px] items-center justify-center shrink-0">
         {typeof icon === "string" ? (

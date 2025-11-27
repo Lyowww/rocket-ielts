@@ -36,7 +36,7 @@ const Dashboard = () => {
     }, [challenges]);
 
     return (
-        <div className="w-full mt-[40px] flex flex-col text-[#23085A]">
+        <div className="w-full flex flex-col text-[#23085A]">
             <h2 className="text-[36px] font-semibold capitalize">My Compass Shows The Way Forward</h2>
             <div className="w-full">
                 <ScoreBar selectedTab={selectedTab} onSelectTab={setSelectedTab} />

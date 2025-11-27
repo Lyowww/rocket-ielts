@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 const KnowYourScorePage = () => {
   return (
-    <div className="w-full mt-20">
+    <div className="w-full -mt-4">
       <KnowYourScore />
     </div>
   );

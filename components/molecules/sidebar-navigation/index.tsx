@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 interface SidebarNavigationProps {
   isOpen: boolean;
   className?: string;
+  onItemSelect?: () => void;
 }
 
 const navigationItems = [
@@ -46,7 +47,7 @@ const navigationItems = [
   },
 ];
 
-const SidebarNavigation = ({ isOpen, className }: SidebarNavigationProps) => {
+const SidebarNavigation = ({ isOpen, className, onItemSelect }: SidebarNavigationProps) => {
   const pathname = usePathname();
 
   return (
@@ -59,6 +60,7 @@ const SidebarNavigation = ({ isOpen, className }: SidebarNavigationProps) => {
           icon={<item.icon />}
           isActive={pathname === item.href}
           isOpen={isOpen}
+          onSelect={onItemSelect}
         />
       ))}
     </nav>

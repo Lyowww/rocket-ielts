@@ -36,12 +36,13 @@ const Navbar = () => {
   ]
   const [selectedMenu, setSelectedMenu] = useState(listMenu[0].name);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const closeMobileSidebar = () => setIsMobileMenuOpen(false);
   const handleSelectMenu = (menu: string) => {
     setSelectedMenu(menu);
   }
 
   const sharedMenu = (className?: string) => (
-    <div className={cn("flex items-center gap-6", className)}>
+    <div className={cn("flex items-center gap-20", className)}>
       {listMenu.map((menu) => (
         <Link href={menu.href} key={menu.id} onClick={() => handleSelectMenu(menu.name)}>
           <p className={cn(
@@ -82,9 +83,9 @@ const Navbar = () => {
             </SheetTitle>
           </SheetHeader>
           <div className="flex flex-col gap-6 px-5 py-6">
-            <SidebarNavigation isOpen className="space-y-1" />
+            <SidebarNavigation isOpen className="space-y-1" onItemSelect={closeMobileSidebar} />
             <div className="border-t border-[#E2E2E5] pt-4">
-              <SidebarActions isOpen />
+              <SidebarActions isOpen onActionComplete={closeMobileSidebar} />
             </div>
             {/* <div className="border-t border-[#E2E2E5] pt-4">
               <NavbarUserProfile />

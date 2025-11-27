@@ -20,8 +20,8 @@ const Sidebar = ({ className }: SidebarProps) => {
         className
       )}
     >
-      <div className="flex h-full flex-col gap-[12px]">
-        <div className={cn("flex items-start justify-end", isOpen ? "px-4 pt-6" : "px-3 pt-6")}>
+      <div className="flex mt-[20px] h-full flex-col gap-[12px]">
+        <div className={cn("flex items-start justify-start", isOpen ? "px-4 pt-6" : "px-3 pt-6")}>
           <button
             type="button"
             aria-label="Toggle sidebar width"
@@ -34,7 +34,7 @@ const Sidebar = ({ className }: SidebarProps) => {
           </button>
         </div>
 
-        <div className="flex flex-col gap-[40px] overflow-y-auto pb-6 scrollbar-23085A">
+        <div className="flex flex-col gap-[40px] mt-[40px] overflow-y-auto pb-6 scrollbar-23085A">
           <SidebarNavigation isOpen={isOpen} />
           <SidebarActions isOpen={isOpen} />
         </div>

@@ -112,7 +112,7 @@ const SubmitAnswer = () => {
   }, [waitForQuestionToSubmit, isPending, isQuestionReady, handleSubmit, data]);
 
   return (
-    <div className="w-full flex lg:flex-row flex-col gap-10">
+    <div className="w-full flex flex-col gap-8 lg:flex-row lg:gap-10">
       <div className="w-full flex flex-col gap-10">
         <div className="text-[#414141] font-semibold flex flex-col gap-2">
           <h2 className="md:text-[20px] font-bold text-[18px]">
@@ -127,13 +127,13 @@ const SubmitAnswer = () => {
                 width={800}
                 height={400}
                 alt="Question image"
-                className="rounded"
+                className="h-auto w-full rounded object-contain"
                 unoptimized
               />
             </div>
           ) : textQuestion ? (
             <div
-              className="mt-4 md:text-[18px] text-[16px] !font-bold break-all max-w-[1000px]"
+              className="mt-4 w-full break-all md:text-[18px] text-[16px] !font-bold max-w-[1000px]"
               dangerouslySetInnerHTML={{
                 __html: textQuestion as string,
               }}
@@ -206,21 +206,21 @@ const SubmitAnswer = () => {
         )}
       </div>
 
-      <div className="w-full h-20">
-        <div className="w-full flex justify-between items-start">
+      <div className="w-full">
+        <div className="w-full flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <h2 className="md:text-[20px] text-[18px] text-[#414141] font-bold">
             {showResults ? "Your Score" : "Your Answer"}
           </h2>
           {!showResults && (
-            <div>
-              <div className="flex flex-col justify-between items-center gap-1">
+            <div className="w-full sm:w-auto">
+              <div className="flex w-full flex-col items-center justify-between gap-1 sm:items-end">
                 <Button
                   onClick={handleClickUpload}
-                  className="bg-[#e1e1e1] hover:bg-[#e1e1e1] hover:opacity-80 text-black w-[180px] h-[50px] font-bold"
+                  className="bg-[#e1e1e1] hover:bg-[#e1e1e1] hover:opacity-80 text-black w-full sm:w-[180px] h-[50px] font-bold text-sm sm:text-base"
                 >
                   Upload File
                 </Button>
-                <p className="text-[14px] font-semibold">
+                <p className="text-[12px] font-semibold text-center sm:text-right">
                   jpeg, png, txt, docx, pdf
                 </p>
               </div>
@@ -260,9 +260,9 @@ const SubmitAnswer = () => {
                   )}
                 </div>
               </div>
-              <div className="w-full flex justify-center items-center mt-10">
+              <div className="w-full flex flex-col items-center gap-3 px-2 sm:px-0 mt-10">
                 <Button
-                  className="bg-[#d32f2f]  h-[51px] text-[18px] font-bold px-6 mb-10 capitalize"
+                  className="bg-[#d32f2f] h-[51px] w-full sm:w-auto text-[16px] sm:text-[18px] font-bold px-6 mb-4 capitalize"
                   onClick={getChatQuestionMutation}
                   disabled={get_chat_questions_pending}
                   isLoading={get_chat_questions_pending}
@@ -365,10 +365,10 @@ const SubmitAnswer = () => {
             )}
           </> */}
 
-          <div className="w-full flex justify-end items-center">
+      <div className="w-full flex flex-col items-stretch gap-4 sm:flex-row sm:justify-end sm:items-center">
             {!showResults && (
               <Button
-                className="bg-[#d32f2f] my-6 h-[51px] text-[18px] font-bold px-6"
+            className="bg-[#d32f2f] my-6 h-[51px] w-full sm:w-auto text-[16px] sm:text-[18px] font-bold px-6"
                 disabled={!!isBelowMin && !answerImage}
                 onClick={() => {
                   if (!answer.trim() && !answerImage) {
