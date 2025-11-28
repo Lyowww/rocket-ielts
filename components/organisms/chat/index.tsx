@@ -128,10 +128,10 @@ const Chat = () => {
 
     return (
       <>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-sm md:text-base">
           {icon} {label} <span className="font-normal">Feedback</span>
         </div>
-        <div>{chat_question.current_feedback}</div>
+        <div className="text-sm md:text-base">{chat_question.current_feedback}</div>
       </>
     );
   }, [chat_question]);
@@ -148,17 +148,17 @@ const Chat = () => {
           <Loader size={60} color="text-primary" />
         </div>
       )}
-      <div className="w-full min-h-[calc(100vh-100px)] flex flex-row justify-center items-start gap-8 bg-[#F8F9FB] pt-12">
-        <div className="flex flex-col gap-6 w-[420px] min-w-[420px]">
-          <div className="bg-white rounded-2xl border border-[#E0E0E0] shadow p-6">
-            <div className="text-[#6C47FF] font-semibold text-lg mb-2 flex items-center gap-2">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div className="w-full min-h-[calc(100vh-100px)] flex flex-col lg:flex-row justify-center items-start gap-4 md:gap-6 lg:gap-8 bg-[#F8F9FB] pt-4 md:pt-6 lg:pt-12 px-4 md:px-6 lg:px-0">
+        <div className="flex flex-col gap-4 md:gap-6 w-full lg:w-[420px] lg:min-w-[420px]">
+          <div className="bg-white rounded-2xl border border-[#E0E0E0] shadow p-4 md:p-6">
+            <div className="text-[#6C47FF] font-semibold text-base md:text-lg mb-2 flex items-center gap-2">
+              <svg className="w-6 h-6 md:w-8 md:h-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M10 5C9.0111 5 8.0444 5.29325 7.22215 5.84265C6.39991 6.39206 5.75904 7.17295 5.3806 8.08659C5.00217 9.00022 4.90315 10.0055 5.09608 10.9755C5.289 11.9454 5.76521 12.8363 6.46447 13.5355C7.16373 14.2348 8.05465 14.711 9.02455 14.9039C9.99446 15.0969 10.9998 14.9978 11.9134 14.6194C12.827 14.241 13.6079 13.6001 14.1573 12.7779C14.7068 11.9556 15 10.9889 15 10C15 8.67392 14.4732 7.40215 13.5355 6.46447C12.5979 5.52679 11.3261 5 10 5ZM10 13C9.40666 13 8.82664 12.8241 8.33329 12.4944C7.83994 12.1648 7.45543 11.6962 7.22836 11.1481C7.0013 10.5999 6.94189 9.99667 7.05765 9.41473C7.1734 8.83279 7.45912 8.29824 7.87868 7.87868C8.29824 7.45912 8.83279 7.1734 9.41473 7.05765C9.99667 6.94189 10.5999 7.0013 11.1481 7.22836C11.6962 7.45543 12.1648 7.83994 12.4944 8.33329C12.8241 8.82664 13 9.40666 13 10C13 10.7957 12.6839 11.5587 12.1213 12.1213C11.5587 12.6839 10.7957 13 10 13ZM22 15C22.9889 15 23.9556 14.7068 24.7779 14.1573C25.6001 13.6079 26.241 12.827 26.6194 11.9134C26.9978 10.9998 27.0969 9.99446 26.9039 9.02455C26.711 8.05465 26.2348 7.16373 25.5355 6.46447C24.8363 5.76521 23.9454 5.289 22.9755 5.09608C22.0055 4.90315 21.0002 5.00217 20.0866 5.3806C19.173 5.75904 18.3921 6.39991 17.8427 7.22215C17.2932 8.0444 17 9.0111 17 10C17 11.3261 17.5268 12.5979 18.4645 13.5355C19.4022 14.4732 20.6739 15 22 15ZM22 7C22.5933 7 23.1734 7.17595 23.6667 7.50559C24.1601 7.83524 24.5446 8.30377 24.7716 8.85195C24.9987 9.40013 25.0581 10.0033 24.9424 10.5853C24.8266 11.1672 24.5409 11.7018 24.1213 12.1213C23.7018 12.5409 23.1672 12.8266 22.5853 12.9424C22.0033 13.0581 21.4001 12.9987 20.852 12.7716C20.3038 12.5446 19.8352 12.1601 19.5056 11.6667C19.1759 11.1734 19 10.5933 19 10C19 9.20435 19.3161 8.44129 19.8787 7.87868C20.4413 7.31607 21.2044 7 22 7ZM10 17C9.0111 17 8.0444 17.2932 7.22215 17.8427C6.39991 18.3921 5.75904 19.173 5.3806 20.0866C5.00217 21.0002 4.90315 22.0055 5.09608 22.9755C5.289 23.9454 5.76521 24.8363 6.46447 25.5355C7.16373 26.2348 8.05465 26.711 9.02455 26.9039C9.99446 27.0969 10.9998 26.9978 11.9134 26.6194C12.827 26.241 13.6079 25.6001 14.1573 24.7779C14.7068 23.9556 15 22.9889 15 22C15 20.6739 14.4732 19.4022 13.5355 18.4645C12.5979 17.5268 11.3261 17 10 17ZM10 25C9.40666 25 8.82664 24.8241 8.33329 24.4944C7.83994 24.1648 7.45543 23.6962 7.22836 23.1481C7.0013 22.5999 6.94189 21.9967 7.05765 21.4147C7.1734 20.8328 7.45912 20.2982 7.87868 19.8787C8.29824 19.4591 8.83279 19.1734 9.41473 19.0576C9.99667 18.9419 10.5999 19.0013 11.1481 19.2284C11.6962 19.4554 12.1648 19.8399 12.4944 20.3333C12.8241 20.8266 13 21.4067 13 22C13 22.7957 12.6839 23.5587 12.1213 24.1213C11.5587 24.6839 10.7957 25 10 25ZM22 17C21.0111 17 20.0444 17.2932 19.2222 17.8427C18.3999 18.3921 17.759 19.173 17.3806 20.0866C17.0022 21.0002 16.9031 22.0055 17.0961 22.9755C17.289 23.9454 17.7652 24.8363 18.4645 25.5355C19.1637 26.2348 20.0546 26.711 21.0245 26.9039C21.9945 27.0969 22.9998 26.9978 23.9134 26.6194C24.8271 26.241 25.6079 25.6001 26.1574 24.7779C26.7068 23.9556 27 22.9889 27 22C27 20.6739 26.4732 19.4022 25.5355 18.4645C24.5979 17.5268 23.3261 17 22 17ZM22 25C21.4067 25 20.8266 24.8241 20.3333 24.4944C19.8399 24.1648 19.4554 23.6962 19.2284 23.1481C19.0013 22.5999 18.9419 21.9967 19.0576 21.4147C19.1734 20.8328 19.4591 20.2982 19.8787 19.8787C20.2982 19.4591 20.8328 19.1734 21.4147 19.0576C21.9967 18.9419 22.5999 19.0013 23.1481 19.2284C23.6962 19.4554 24.1648 19.8399 24.4944 20.3333C24.8241 20.8266 25 21.4067 25 22C25 22.7957 24.6839 23.5587 24.1213 24.1213C23.5587 24.6839 22.7957 25 22 25Z" fill="#B20027" />
               </svg>
 
-              You Are Here To Solve The Following Challenge:
+              <span className="text-sm md:text-base lg:text-lg">You Are Here To Solve The Following Challenge:</span>
             </div>
-            <div className="bg-[#F3F6FF] p-3 rounded-lg text-[#23085A] border-b border-b-[#9a9a9a] border-b-2">
+            <div className="bg-[#F3F6FF] p-3 rounded-lg text-[#23085A] border-b border-b-[#9a9a9a] border-b-2 text-sm md:text-base">
               {typeof chat_question !== 'string' && (
                 <div>
                   {chat_question?.challenge && <div><b>Challenge:</b> {chat_question?.challenge}</div>}
@@ -167,31 +167,31 @@ const Chat = () => {
               )}
             </div >
           </div>
-          <div className="bg-white rounded-2xl border border-[#E0E0E0] shadow p-6 flex-1 flex flex-col justify-between">
-            <div className="text-[#23085A]">
+          <div className="bg-white rounded-2xl border border-[#E0E0E0] shadow p-4 md:p-6 flex-1 flex flex-col justify-between">
+            <div className="text-[#23085A] text-sm md:text-base">
               {typeof chat_question !== 'string' && chat_question?.motivational_text && chat_question.motivational_text !== "NA" && <div><b>Motivation:</b> {chat_question.motivational_text}</div>}            </div>
           </div>
         </div>
-        <div className="flex flex-col gap-1 w-[650px] min-w-[650px] relative">
+        <div className="flex flex-col gap-1 w-full lg:w-[650px] lg:min-w-[650px] relative">
           <button
-            className="text-[#2B3ADD] underline text-base font-medium w-fit  cursor-pointer mb-2 ml-2 hover:text-[#1a237e]"
+            className="text-[#2B3ADD] underline text-sm md:text-base font-medium w-fit cursor-pointer mb-2 ml-0 md:ml-2 hover:text-[#1a237e]"
             onClick={() => setShowPreviousModal(true)}
             style={{ alignSelf: 'flex-start', color: !chatPrevPayload || !chatPrevPayload.manualQues  || chatPrevPayload.manualQues === "PRACTICE COMPLETED!" ? "gray" : "" }}
             disabled={!chatPrevPayload || !chatPrevPayload.manualQues || chatPrevPayload.manualQues === "PRACTICE COMPLETED!"}
           >
             See Previous Exercise
           </button>
-          { typeof chat_question !== 'string' && chat_question?.current_feedback !== "NA" && chat_question?.current_feedback !== "PRACTICE COMPLETED!" && chat_question?.current_feedback !== "" ? <div className="bg-[#f8f8f8] rounded-2xl overflow-y border border-[#E0E0E0] shadow p-6 flex flex-col gap-2">
+          { typeof chat_question !== 'string' && chat_question?.current_feedback !== "NA" && chat_question?.current_feedback !== "PRACTICE COMPLETED!" && chat_question?.current_feedback !== "" ? <div className="bg-[#f8f8f8] rounded-2xl overflow-y border border-[#E0E0E0] shadow p-4 md:p-6 flex flex-col gap-2 text-sm md:text-base">
             {feedbackContent} 
           </div> : ""}
-          <div className="bg-white rounded-2xl border border-[#E0E0E0] shadow p-6 flex flex-col gap-4 flex-1">
-            <div className="font-bold text-2xl text-[#23085A] mb-1">
+          <div className="bg-white rounded-2xl border border-[#E0E0E0] shadow p-4 md:p-6 flex flex-col gap-3 md:gap-4 flex-1">
+            <div className="font-bold text-lg md:text-xl lg:text-2xl text-[#23085A] mb-1">
               {typeof chat_question !== 'string' && chat_question?.generated_exercise && chat_question.generated_exercise !== "NA" && chat_question.generated_exercise !== "PRACTICE COMPLETED!" && <div><b>Question:</b> {chat_question.generated_exercise}</div>}
 
             </div>
-            <div className="mb-1 text-lg font-semibold text-[#23085A]">Your Answer:</div>
+            <div className="mb-1 text-base md:text-lg font-semibold text-[#23085A]">Your Answer:</div>
             <textarea
-              className="w-full min-h-[120px] border border-[#C6D4EF] rounded-lg p-4 text-base text-[#23085A] bg-[#F8F9FB] resize-none"
+              className="w-full min-h-[120px] border border-[#C6D4EF] rounded-lg p-3 md:p-4 text-sm md:text-base text-[#23085A] bg-[#F8F9FB] resize-none"
               placeholder="Type your answer here..."
               value={typeof answer === 'string' ? answer : ''}
               onChange={(e) => handleTextChange(e.target.value)}
@@ -206,17 +206,17 @@ const Chat = () => {
 
           <div className="flex justify-end">
 
-            <Button className="w-[180px] h-[56px] bg-[#C3002F] text-white text-lg rounded-xl shadow-none mt-3" onClick={() => { handleSend(challengeRound.current); }}>Submit</Button>
+            <Button className="w-full sm:w-[180px] h-[48px] md:h-[56px] bg-[#C3002F] text-white text-base md:text-lg rounded-xl shadow-none mt-3" onClick={() => { handleSend(challengeRound.current); }}>Submit</Button>
           </div>
 
         </div>
       </div>
 
       <GlobalModal open={showPreviousModal} onOpenChange={setShowPreviousModal} title={undefined} isNeedBtn>
-        <div className="flex flex-col items-center justify-center text-start p-8 min-w-[600px] max-h-[70vh] overflow-y-auto">
-          <div className="w-full bg-white rounded-2xl border border-[#E0E0E0] shadow p-6 flex flex-col gap-4 mt-2">
-            <div className="mb-1 text-lg font-semibold text-[#23085A]">Previous Exercise Question: {chatPrevPayload?.manualQues !== "PRACTICE COMPLETED!" && chatPrevPayload?.manualQues}</div>
-            <div className="bg-[#F8F9FB] border border-[#C6D4EF] rounded-lg p-4 text-base text-[#23085A]">
+        <div className="flex flex-col items-center justify-center text-start p-4 md:p-6 lg:p-8 w-full max-w-[600px] max-h-[70vh] overflow-y-auto">
+          <div className="w-full bg-white rounded-2xl border border-[#E0E0E0] shadow p-4 md:p-6 flex flex-col gap-3 md:gap-4 mt-2">
+            <div className="mb-1 text-base md:text-lg font-semibold text-[#23085A]">Previous Exercise Question: {chatPrevPayload?.manualQues !== "PRACTICE COMPLETED!" && chatPrevPayload?.manualQues}</div>
+            <div className="bg-[#F8F9FB] border border-[#C6D4EF] rounded-lg p-3 md:p-4 text-sm md:text-base text-[#23085A]">
               {chatPrevPayload  ? chatPrevPayload.user_input : 'No previous question found.'}
             </div>
           </div>
@@ -227,19 +227,19 @@ const Chat = () => {
         open={showPracticeCompleteModal}
         onOpenChange={setShowPracticeCompleteModal}
       >
-        <div className="flex flex-col items-center justify-center text-center p-8 min-w-[600px] max-h-[70vh] overflow-y-auto">
-          <div className="text-2xl font-bold text-center mb-2 flex items-center gap-2">
+        <div className="flex flex-col items-center justify-center text-center p-4 md:p-6 lg:p-8 w-full max-w-[600px] max-h-[70vh] overflow-y-auto">
+          <div className="text-xl md:text-2xl font-bold text-center mb-2 flex items-center justify-center gap-2">
             Practice Complete!
 
           </div>
-          <div className="text-center text-lg mb-6 text-[#444]">
-            You&apos;re one step closer to IELTS success. Let&apos;s <br /> tackle the next one!
+          <div className="text-center text-base md:text-lg mb-4 md:mb-6 text-[#444]">
+            You&apos;re one step closer to IELTS success. Let&apos;s <br className="hidden sm:block" /> tackle the next one!
           </div>
 
-          <Image src={'https://res.cloudinary.com/duwsak7vc/image/upload/v1753451300/practice_zqrwkd.png'} alt="challenge-complete" width={238} height={241} />
-          <div className="flex gap-4 mt-4">
+          <Image src={'https://res.cloudinary.com/duwsak7vc/image/upload/v1753451300/practice_zqrwkd.png'} alt="challenge-complete" width={238} height={241} className="w-[180px] h-auto md:w-[238px]" />
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-4 w-full sm:w-auto">
             <Button
-              className="w-[200px] h-[56px] bg-[#F3F1FF] text-[#23085A] text-lg rounded-xl border border-[#E0E0E0]"
+              className="w-full sm:w-[200px] h-[48px] md:h-[56px] bg-[#F3F1FF] text-[#23085A] text-base md:text-lg rounded-xl border border-[#E0E0E0]"
               style={{ boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px' }}
               onClick={() => { router.push(PrivateRouteEnum.knowYourScore); setShowPracticeCompleteModal(false); }}
             >
@@ -253,11 +253,11 @@ const Chat = () => {
       <GlobalModal open={showChallengeCompleteModal}
         onOpenChange={setShowChallengeCompleteModal}
       >
-        <div className="flex flex-col items-center justify-center text-center p-8 min-w-[600px] max-h-[70vh] overflow-y-auto">
-          <div className="text-2xl font-bold text-center mb-2 flex items-center gap-2">
+        <div className="flex flex-col items-center justify-center text-center p-4 md:p-6 lg:p-8 w-full max-w-[600px] max-h-[70vh] overflow-y-auto">
+          <div className="text-xl md:text-2xl font-bold text-center mb-2 flex items-center justify-center gap-2">
             Challenge Complete!
             <span role="img" aria-label="celebrate">
-              <svg width="32" height="31" viewBox="0 0 32 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-6 h-6 md:w-8 md:h-8" viewBox="0 0 32 31" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12.1329 1.47052C12.4358 1.16491 13.4203 0.153796 13.7465 0.000835746C14.5785 -0.0431258 14.1647 1.65892 14.2455 2.34836C14.5617 2.56902 16.5456 3.46933 15.7249 4.01518C15.4323 4.20986 14.3916 4.45873 13.9801 4.63107C13.881 5.0115 13.6033 6.28766 13.3332 6.51832C12.9272 6.86491 12.6079 6.26648 12.4148 6.00164C12.1672 5.66187 11.9226 5.31923 11.6673 4.98521C11.2566 4.72282 8.39299 5.96673 9.84117 4.01401C10.0826 3.68839 10.3257 3.36437 10.5501 3.02684C10.393 2.5538 9.52503 1.0738 10.0574 0.824822C10.4153 0.657385 11.6818 1.31223 12.1329 1.47052ZM13.3745 1.47052C12.1657 2.59712 12.4186 2.46077 11.0253 1.94866C11.7344 3.5614 11.4963 2.97585 10.7752 4.2005C11.2221 4.12375 11.701 4.00538 12.1329 4.2005C12.4229 4.49056 12.6712 4.86673 12.9085 5.20182L12.9204 5.16999C13.4776 3.6605 12.9704 4.02486 14.5691 3.52617C12.7673 2.51953 13.5741 2.80501 13.3745 1.47052Z" fill="#C7002B" />
                 <path d="M17.1409 12.1896C16.5629 12.2104 16.1822 11.2498 16.0426 10.796C15.5126 9.07266 16.2831 7.6843 17.7385 6.82338C19.6631 5.68475 19.6664 2.79105 17.7973 1.55566C17.4891 1.35192 16.8227 1.16597 17.1273 0.660993C17.2019 0.537305 17.2863 0.489404 17.4221 0.452148C18.3196 0.543691 19.3163 1.78494 19.6699 2.53878C20.4024 4.10032 20.0399 5.98524 18.7573 7.14133C18.0119 7.813 17.2735 7.81353 16.8773 8.93311C16.6228 9.65225 16.7128 10.4586 17.1018 11.1121C17.3015 11.4479 17.8438 11.9362 17.1409 12.1896Z" fill="#C7002B" />
                 <path d="M4.89276 5.57183C3.0155 5.74672 2.69596 3.11403 4.48635 2.83344C6.24609 2.67399 6.65324 5.18597 4.89276 5.57183ZM4.57492 3.66924C3.87984 3.88543 4.06792 4.82363 4.76407 4.72954C5.41529 4.48706 5.27447 3.6421 4.57492 3.66924Z" fill="#C7002B" />
@@ -272,22 +272,22 @@ const Chat = () => {
               </svg>
             </span>
           </div>
-          <div className="text-center text-lg mb-6 text-[#444]">
-            You&apos;re one step closer to IELTS success.<br /> Let’s tackle the next one!
+          <div className="text-center text-base md:text-lg mb-4 md:mb-6 text-[#444]">
+            You&apos;re one step closer to IELTS success.<br className="hidden sm:block" /> Let's tackle the next one!
           </div>
-          <Image src={'https://res.cloudinary.com/duwsak7vc/image/upload/v1753451204/challenge_vrvrfa.png'} alt="challenge-complete" width={258} height={261} />
+          <Image src={'https://res.cloudinary.com/duwsak7vc/image/upload/v1753451204/challenge_vrvrfa.png'} alt="challenge-complete" width={258} height={261} className="w-[180px] h-auto md:w-[258px]" />
 
 
-          <div className="flex gap-4 mt-10">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-6 md:mt-10 w-full sm:w-auto">
             <Button
-              className="w-[200px] h-[56px] bg-[#F3F1FF] text-[#23085A] text-lg rounded-xl border border-[#E0E0E0]"
+              className="w-full sm:w-[200px] h-[48px] md:h-[56px] bg-[#F3F1FF] text-[#23085A] text-base md:text-lg rounded-xl border border-[#E0E0E0]"
               style={{ boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px' }}
               onClick={() => { router.push(PrivateRouteEnum.knowYourScore); setShowPracticeCompleteModal(false); }}
             >
               Take a New Test
             </Button>
             <Button
-              className="w-[200px] h-[56px] bg-[#C3002F] text-white text-lg rounded-xl"
+              className="w-full sm:w-[200px] h-[48px] md:h-[56px] bg-[#C3002F] text-white text-base md:text-lg rounded-xl"
               style={{ boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px' }}
               onClick={() => { handleNextPractice(); setShowPracticeCompleteModal(false); }}
             >
@@ -316,9 +316,9 @@ const Chat = () => {
         </Sheet>
       </div>
       <AlertDialog open={showQuestion}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[95vw] md:max-w-[600px]">
           <AlertDialogHeader className="flex flex-col items-center justify-center text-center">
-            <AlertDialogTitle className="text-[30px] flex  justify-between">
+            <AlertDialogTitle className="text-xl md:text-2xl lg:text-[30px] flex justify-between w-full">
               Your Question{" "}
               <span
                 role="button"
@@ -328,7 +328,7 @@ const Chat = () => {
                 <X />
               </span>
             </AlertDialogTitle>
-            <AlertDialogDescription className="mt-4 text-lg">
+            <AlertDialogDescription className="mt-4 text-base md:text-lg w-full">
               {generatedQuestion?.file && (
                 <Image
                   src={
@@ -338,13 +338,13 @@ const Chat = () => {
                   }
                   width={600}
                   height={500}
-                  className="object-cover mb-4"
+                  className="object-cover mb-4 w-full h-auto"
                   alt="question"
                 />
               )}
               {generatedQuestion?.text && (
-                <div className="w-full h-[300px] overflow-y-auto">
-                  <p className="text-[16px] text-gray-800">
+                <div className="w-full h-[200px] md:h-[300px] overflow-y-auto">
+                  <p className="text-sm md:text-base lg:text-[16px] text-gray-800">
                     {generatedQuestion?.text}
                   </p>
                 </div>
@@ -354,9 +354,9 @@ const Chat = () => {
         </AlertDialogContent>
       </AlertDialog>
       <AlertDialog open={showAnswer}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[95vw] md:max-w-[600px]">
           <AlertDialogHeader className="flex flex-col items-center justify-center text-center">
-            <AlertDialogTitle className="text-[30px] flex  justify-between">
+            <AlertDialogTitle className="text-xl md:text-2xl lg:text-[30px] flex justify-between w-full">
               Your Answer{" "}
               <span
                 role="button"
@@ -366,7 +366,7 @@ const Chat = () => {
                 <X />
               </span>
             </AlertDialogTitle>
-            <AlertDialogDescription className="mt-4 text-lg">
+            <AlertDialogDescription className="mt-4 text-base md:text-lg w-full">
               {generatedQuestion?.answerFile && (
                 <Image
                   src={URL.createObjectURL(
@@ -374,13 +374,13 @@ const Chat = () => {
                   )}
                   width={600}
                   height={500}
-                  className="object-cover mb-4"
+                  className="object-cover mb-4 w-full h-auto"
                   alt="question"
                 />
               )}
               {generatedQuestion?.answer && (
-                <div className="w-full h-[300px] overflow-y-auto">
-                  <div className="text-[16px] text-gray-800">
+                <div className="w-full h-[200px] md:h-[300px] overflow-y-auto">
+                  <div className="text-sm md:text-base lg:text-[16px] text-gray-800">
                     {generatedQuestion?.answer}
                   </div>
                 </div>
