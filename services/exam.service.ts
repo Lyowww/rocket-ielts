@@ -1,6 +1,7 @@
 import { baseApi } from "@/api/api";
 import { EndpointEnum } from "@/enum/endpoints.enum";
 import {
+  HistoricalExam,
   HistoricalExamListResponse,
   HistoricalExamQueryParams,
 } from "@/types/historical-exam";
