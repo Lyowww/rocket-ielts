@@ -9,6 +9,8 @@ import { SpeakingIcon } from "@/assets/icons/SpeakingIcon";
 import { examService } from "@/services/exam.service";
 import { HistoricalExam } from "@/types/historical-exam";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { PrivateRouteEnum } from "@/enum/routes.enum";
 
 type ExamData = HistoricalExam;
 
@@ -16,6 +18,7 @@ type SortField = 'date' | 'score' | null;
 type SortDirection = 'asc' | 'desc';
 
 export const PreviousExams = () => {
+    const router = useRouter();
     const [exams, setExams] = useState<ExamData[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchDropdownRef = useRef<HTMLDivElement>(null);
@@ -246,6 +249,14 @@ export const PreviousExams = () => {
         window.open(url, "_blank", "noopener,noreferrer");
     };
 
+    const handleViewExam = (examId: number | undefined) => {
+        if (!examId || isNaN(Number(examId))) {
+            toast.error("Invalid exam ID");
+            return;
+        }
+        router.push(`${PrivateRouteEnum.historicalExamDetail}${examId}`);
+    };
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (isSkillDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -436,6 +447,10 @@ export const PreviousExams = () => {
                             </tr>
                         ) : (
                             filteredExams.map((exam) => {
+                                // Skip exams without valid IDs
+                                if (!exam.id || isNaN(Number(exam.id))) {
+                                    return null;
+                                }
                                 const isSelected = selectedSkill !== null && exam.skill === selectedSkill;
                                 const scoreDisplay = getScoreDisplay(exam.score);
                                 const hasFinalAnswer = Boolean(exam.final_answer);
@@ -467,9 +482,14 @@ export const PreviousExams = () => {
                                             <div className="flex items-center justify-start gap-2 flex-wrap sm:flex-nowrap">
                                                 <div className="flex items-center gap-2  p-[1px] rounded-[9px] w-full sm:w-auto">
                                                     <button
-                                                        className={`w-full sm:w-auto px-4 sm:px-[57px] py-2 text-[14px] sm:text-[16.25px] bg-[#F4EFFF] border-[1px] border-[#00000033] text-[#23085A] rounded-[8px] transition-colors ${hasFinalAnswer ? 'hover:bg-purple-200 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
-                                                        onClick={() => hasFinalAnswer && handleOpenLink(exam.final_answer, "Answer summary not available yet.")}
-                                                        disabled={!hasFinalAnswer}
+                                                        className="w-full sm:w-auto px-4 sm:px-[57px] py-2 text-[14px] sm:text-[16.25px] bg-[#F4EFFF] border-[1px] border-[#00000033] text-[#23085A] rounded-[8px] transition-colors hover:bg-purple-200 cursor-pointer"
+                                                        onClick={() => {
+                                                            if (exam.id && !isNaN(Number(exam.id))) {
+                                                                handleViewExam(exam.id);
+                                                            } else {
+                                                                toast.error("Invalid exam ID");
+                                                            }
+                                                        }}
                                                     >
                                                         View
                                                     </button>
@@ -552,6 +572,10 @@ export const PreviousExams = () => {
                 </div>
             ) : (
                 filteredExams.map((exam) => {
+                    // Skip exams without valid IDs
+                    if (!exam.id || isNaN(Number(exam.id))) {
+                        return null;
+                    }
                     const scoreDisplay = getScoreDisplay(exam.score);
                     const hasFinalAnswer = Boolean(exam.final_answer);
                     const hasReport = Boolean(exam.full_report_url);
@@ -582,11 +606,16 @@ export const PreviousExams = () => {
                             </div>
                             <div className="mt-4 flex flex-col gap-2">
                                 <button
-                                    className={`w-full rounded-xl border border-[#00000033] px-4 py-2 text-base font-semibold text-[#23085A] transition-colors ${hasFinalAnswer ? 'bg-[#F4EFFF] hover:bg-[#e0d3ff]' : 'bg-[#F4EFFF] opacity-50 cursor-not-allowed'}`}
-                                    onClick={() => hasFinalAnswer && handleOpenLink(exam.final_answer, "Answer summary not available yet.")}
-                                    disabled={!hasFinalAnswer}
+                                    className="w-full rounded-xl border border-[#00000033] px-4 py-2 text-base font-semibold text-[#23085A] transition-colors bg-[#F4EFFF] hover:bg-[#e0d3ff]"
+                                    onClick={() => {
+                                        if (exam.id && !isNaN(Number(exam.id))) {
+                                            handleViewExam(exam.id);
+                                        } else {
+                                            toast.error("Invalid exam ID");
+                                        }
+                                    }}
                                 >
-                                    View Answers
+                                    View
                                 </button>
                                 <button
                                     className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-colors ${hasReport ? 'bg-[#23085A] text-white hover:bg-[#1a0643]' : 'bg-[#F2F2F4] text-[#23085A] opacity-50 cursor-not-allowed'}`}

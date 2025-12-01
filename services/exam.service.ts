@@ -22,6 +22,18 @@ class ExamService {
       return Promise.reject(error);
     }
   }
+
+  async getHistoricalExamById(id: number): Promise<HistoricalExam> {
+    try {
+      const response = await baseApi.get(`${EndpointEnum.historicalExamDetail}${id}/`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return Promise.reject(error?.response?.data ?? error);
+      }
+      return Promise.reject(error);
+    }
+  }
 }
 
 export const examService = new ExamService();
