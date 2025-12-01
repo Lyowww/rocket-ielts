@@ -4,7 +4,7 @@ import { chatService } from "@/services/chat.service";
 import { questionService } from "@/services/question.service";
 import { useChatStore } from "@/store/chat.store";
 import { useQuestionOrImageStore } from "@/store/questionOrImage.store";
-import { fileToBase64 } from "@/utils/helpFunctions";
+import { fileToBase64, mapExamTypeToBackend } from "@/utils/helpFunctions";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
@@ -54,7 +54,7 @@ const useSubmitAnswer = () => {
             : false;
           setChatQuestion(responseData?.answer);
           setPrevPayload({
-            exam_type: examType ?? "writing",
+            exam_type: mapExamTypeToBackend(examType) as any,
             task_number: String(questionChoice),
             answer_text: answer,
             image_path:
@@ -141,7 +141,7 @@ const useSubmitAnswer = () => {
     }
     
     const payload: SubmitQuestionPayload = {
-      exam_type: examType ?? "writing",
+      exam_type: mapExamTypeToBackend(examType) as any,
       task_number: String(questionChoice),
       answer_text: answer,
       image_path: (data?.question_path as string) || (base64File as string),
@@ -179,7 +179,7 @@ const useSubmitAnswer = () => {
 
     // Use the same payload structure as handleSubmit, but with mode "1" for practice
     const payload: SubmitQuestionPayload = {
-      exam_type: examType ?? "writing",
+      exam_type: mapExamTypeToBackend(examType) as any,
       task_number: String(questionChoice),
       answer_text: answer,
       image_path: (data?.question_path as string) || (base64File as string),
@@ -217,7 +217,7 @@ const useSubmitAnswer = () => {
     if (lastFetchKeyRef.current === key) return;
     lastFetchKeyRef.current = key;
     mutate({
-      exam_type: examType,
+      exam_type: mapExamTypeToBackend(examType),
       task_number: String(questionChoice),
     });
   }, [examType, taskNumber, image, question, questionChoice, mutate]);

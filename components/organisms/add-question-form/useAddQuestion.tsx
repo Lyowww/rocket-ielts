@@ -3,7 +3,7 @@
 import { PrivateRouteEnum } from "@/enum/routes.enum";
 import { questionService } from "@/services/question.service";
 import { useQuestionOrImageStore } from "@/store/questionOrImage.store";
-import { fileToBase64 } from "@/utils/helpFunctions";
+import { fileToBase64, mapExamTypeToBackend } from "@/utils/helpFunctions";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useLayoutEffect, useState } from "react";
@@ -103,7 +103,7 @@ const useAddQuestion = () => {
       push(PrivateRouteEnum.test);
     } else {
       mutate({
-        exam_type: examType!,
+        exam_type: mapExamTypeToBackend(examType) as any,
         task_number: String(taskNumber),
         file_base64: bas64Image,
         file_type: image?.type as string,

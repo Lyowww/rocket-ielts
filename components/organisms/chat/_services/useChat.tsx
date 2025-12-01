@@ -1,6 +1,7 @@
 "use client";
 import { chatService } from "@/services/chat.service";
 import { useChatStore } from "@/store/chat.store";
+import { mapExamTypeToBackend } from "@/utils/helpFunctions";
 import { useMutation } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -31,7 +32,7 @@ const useChat = (firstRound: React.RefObject<number>,isFirstFeedback:React.RefOb
         { role: "evaluation", text: res?.answer ?? "No response" },
       ]);
       setPrevPayload({
-        exam_type: data.exam_type,
+        exam_type: mapExamTypeToBackend(data.exam_type) as any,
         task_number: data.task_number,
         answer_text: data.answer_text,
         image_path: data.image_path,
