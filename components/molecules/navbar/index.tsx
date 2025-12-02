@@ -65,7 +65,9 @@ const Navbar = () => {
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden"
             />
-            <Logo />
+            <Link href={"/"} className="flex items-center gap-2 cursor-pointer">
+              <Logo />
+            </Link>
           </div>
           {sharedMenu("hidden lg:flex flex-1 justify-center")}
           <div className="ml-auto flex items-center gap-3">
@@ -79,7 +81,9 @@ const Navbar = () => {
         <SheetContent side="left" className="w-full max-w-sm border-none bg-[#F6F6FB] p-0">
           <SheetHeader className="border-b border-[#E2E2E5]">
             <SheetTitle className="flex items-center gap-2 text-[#23085A] px-5">
-              <Logo />
+              <Link href={"/"} className="flex items-center gap-2 cursor-pointer">
+                <Logo />
+              </Link>
             </SheetTitle>
           </SheetHeader>
           <div className="flex flex-col gap-6 px-5 py-6">

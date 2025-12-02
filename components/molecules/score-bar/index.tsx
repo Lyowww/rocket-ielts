@@ -256,13 +256,13 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
                 </div>
             </div>
 
-            <GlobalModal className="w-[90vw] max-w-[800px] p-20" open={isMilestonesOpen} onOpenChange={setIsMilestonesOpen} isNeedBtn>
+            <GlobalModal className="p-4 sm:p-6 md:p-8 lg:p-12 xl:p-20" open={isMilestonesOpen} onOpenChange={setIsMilestonesOpen} isNeedBtn>
                 <div className="w-full">
-                    <div className="mb-4 flex items-center justify-center gap-2">
-                        <h3 className="text-lg font-semibold text-[#23085A]">Milestones</h3>
-                        <AchievementIcon className="h-[15px] w-[11px] text-[#23085A]" />
+                    <div className="mb-4 sm:mb-6 flex items-center justify-center gap-2">
+                        <h3 className="text-base sm:text-lg md:text-xl font-semibold text-[#23085A]">Milestones</h3>
+                        <AchievementIcon className="h-[12px] w-[9px] sm:h-[15px] sm:w-[11px] text-[#23085A]" />
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4">
                         {[...milestones, ...milestones, ...milestones]
                             .sort((a, b) => (a.disabled === b.disabled ? 0 : a.disabled ? 1 : -1))
                             .map((el, index) => (
@@ -271,7 +271,7 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
                                     title={el.title}
                                     icon={el.icon}
                                     disabled={el.disabled}
-                                    className="inline-block h-[79px] w-[104px] text-[#23085A]"
+                                    className="inline-block h-[60px] w-[80px] sm:h-[65px] sm:w-[85px] md:h-[70px] md:w-[92px] lg:h-[75px] lg:w-[98px] xl:h-[79px] xl:w-[104px] text-[#23085A]"
                                 />
                             ))}
                     </div>

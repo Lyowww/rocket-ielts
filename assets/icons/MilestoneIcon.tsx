@@ -1,5 +1,5 @@
 export const MilestoneIcon = ({ title, icon, className, disabled = false }: { title: string, icon: React.ReactNode, className?: string, disabled?: boolean }) => {
-    return (<div className="relative">
+    return (<div className="relative flex-shrink-0">
         <svg width="104" height="79" viewBox="0 0 104 79" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
             <path d="M78.8728 39.3745C86.1109 38.7569 93.3325 37.9028 100.526 36.8121C98.7975 40.0676 97.0026 43.3098 95.1413 46.5377C97.8398 49.1676 100.6 51.7662 103.422 54.3307C95.8131 55.4846 88.1726 56.3887 80.5152 57.0409C79.9677 51.1523 79.4202 45.2626 78.8728 39.3745Z" fill={disabled ? "#D7D7D7" : "#C7002B"} />
             <path d="M85.2738 42.604C83.1169 41.5479 80.9839 40.4711 78.8728 39.3746C79.4202 45.2632 79.9677 51.1523 80.5152 57.0409C82.7411 58.1279 84.9894 59.1935 87.2622 60.238C86.5994 54.3595 85.936 48.482 85.2738 42.604Z" fill={disabled ? "#3A3A3A" : "#850000"} />
@@ -16,10 +16,14 @@ export const MilestoneIcon = ({ title, icon, className, disabled = false }: { ti
             <path d="M33.9214 20L33.2825 21.2959L31.8522 21.5031L32.8871 22.512L32.6431 23.9353L33.9214 23.263L35.2002 23.9353L34.9557 22.512L35.9905 21.5031L34.5602 21.2959L33.9214 20Z" fill={disabled ? "#3A3A3A" : "white"} />
             <path d="M31.0408 25.4608L30.4014 26.7561L28.9716 26.9634L30.0059 27.9722L29.762 29.3961L31.0408 28.7243L32.3191 29.3961L32.0746 27.9722L33.1094 26.9634L31.6802 26.7561L31.0408 25.4608Z" fill={disabled ? "#3A3A3A" : "white"} />
         </svg>
-        <div className={`absolute top-1/3 -translate-y-1/2 left-0 w-full h-full flex flex-col items-center justify-center  ${disabled ? 'grayscale' : ''}`}>
-            {icon}
+        <div className={`absolute top-1/3 -translate-y-1/2 left-0 w-full h-full flex flex-col items-center justify-center ${disabled ? 'grayscale' : ''}`}>
+            <div className="scale-75 sm:scale-90 md:scale-100">
+                {icon}
+            </div>
         </div>
-        <div className="absolute bottom-0 top-1/2 -translate-y-1/3 left-1/2 -translate-x-1/2 w-[40px] h-full flex flex-col  items-center justify-center text-center"> <h3 className={`text-[7px] leading-[8px] ${disabled ? 'text-black' : 'text-white'} font-bold`}>{title}</h3></div>
+        <div className="absolute bottom-0 top-1/2 -translate-y-1/3 left-1/2 -translate-x-1/2 w-[40px] h-full flex flex-col items-center justify-center text-center">
+            <h3 className={`text-[6px] sm:text-[6.5px] md:text-[7px] leading-[7px] sm:leading-[7.5px] md:leading-[8px] ${disabled ? 'text-black' : 'text-white'} font-bold break-words`}>{title}</h3>
+        </div>
     </div>
     );
 };

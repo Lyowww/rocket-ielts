@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { PenIcon } from "@/assets/icons";
-import { ChevronDown, SearchIcon, Settings2 } from "lucide-react";
+import { ChevronDown, SearchIcon, Settings2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { MapIcon } from "@/assets/icons/MapIcon";
 import { ReadingIcon } from "@/assets/icons/ReadingIcon";
 import { ListeningIcon } from "@/assets/icons/ListeningIcon";
@@ -17,16 +17,17 @@ type ExamData = HistoricalExam;
 type SortField = 'date' | 'score' | null;
 type SortDirection = 'asc' | 'desc';
 
+const ITEMS_PER_PAGE = 10;
+
 export const PreviousExams = () => {
     const router = useRouter();
     const [exams, setExams] = useState<ExamData[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchDropdownRef = useRef<HTMLDivElement>(null);
-    const loadMoreRef = useRef<HTMLDivElement>(null);
     const latestRequestRef = useRef<number>(0);
 
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+    const [selectedSearchTerm, setSelectedSearchTerm] = useState<string>("");
     const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
     const [isSkillDropdownOpen, setIsSkillDropdownOpen] = useState<boolean>(false);
     const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState<boolean>(false);
@@ -37,6 +38,8 @@ export const PreviousExams = () => {
     const [pagination, setPagination] = useState({ count: 0, next: false, previous: false });
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [serverPageSize, setServerPageSize] = useState<number | null>(null);
+    const [serverPages, setServerPages] = useState<Record<number, ExamData[]>>({});
 
     const orderingParam = useMemo(() => {
         if (!sortField) return undefined;
@@ -81,18 +84,12 @@ export const PreviousExams = () => {
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
-
-    useEffect(() => {
         setPage(1);
         setExams([]);
         setPagination({ count: 0, next: false, previous: false });
-    }, [debouncedSearchTerm, orderingParam]);
+        setServerPages({});
+        setServerPageSize(null);
+    }, [selectedSearchTerm, selectedSkill, orderingParam]);
 
     const fetchHistoricalExams = useCallback(async () => {
         const requestId = Date.now();
@@ -100,35 +97,90 @@ export const PreviousExams = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await examService.getHistoricalExams({
-                search: debouncedSearchTerm.trim() || undefined,
+            // Ensure we know backend page size by fetching page 1 if unknown or cache empty
+            let localServerPages = serverPages;
+            let localServerPageSize = serverPageSize;
+
+            const buildParams = (p: number) => ({
+                search: selectedSearchTerm.trim() || undefined,
                 ordering: orderingParam,
-                page,
+                page: p,
+                skill: selectedSkill || undefined,
             });
 
-            if (latestRequestRef.current !== requestId) {
+            // If we don't yet know backend page size, fetch the first server page
+            if (!localServerPageSize) {
+                if (!localServerPages[1]) {
+                    const firstResp = await examService.getHistoricalExams(buildParams(1));
+                    if (latestRequestRef.current !== requestId) return;
+                    const firstResults = firstResp.results ?? [];
+                    localServerPages = { ...localServerPages, 1: firstResults };
+                    localServerPageSize = firstResults.length || null;
+                    setServerPages(localServerPages);
+                    setServerPageSize(localServerPageSize);
+                    setPagination({
+                        count: firstResp.count ?? 0,
+                        next: Boolean(firstResp.next),
+                        previous: Boolean(firstResp.previous),
+                    });
+                } else {
+                    localServerPageSize = localServerPages[1]?.length || null;
+                    setServerPageSize(localServerPageSize);
+                }
+            }
+
+            const count = pagination.count;
+            // If there is no data
+            if ((localServerPageSize ?? 0) === 0 || count === 0) {
+                setExams([]);
                 return;
             }
 
-            setExams((prev) => {
-                const incoming = response.results ?? [];
-                if (page === 1) {
-                    return incoming;
-                }
-                const existingIds = new Set(prev.map((exam) => exam.id));
-                const merged = [...prev];
-                incoming.forEach((exam) => {
-                    if (!existingIds.has(exam.id)) {
-                        merged.push(exam);
+            // Compute which backend pages are needed to render the current UI page of size ITEMS_PER_PAGE
+            const s = localServerPageSize as number;
+            const startIndex = (page - 1) * ITEMS_PER_PAGE; // 0-based global index
+            const endExclusive = startIndex + ITEMS_PER_PAGE;
+            const serverPageStart = Math.floor(startIndex / s) + 1;
+            const serverPageEnd = Math.floor((endExclusive - 1) / s) + 1;
+
+            // Fetch any missing backend pages in the required range
+            const pagesToFetch: number[] = [];
+            for (let sp = serverPageStart; sp <= serverPageEnd; sp++) {
+                if (!localServerPages[sp]) pagesToFetch.push(sp);
+            }
+            if (pagesToFetch.length > 0) {
+                const fetchPromises = pagesToFetch.map((sp) => examService.getHistoricalExams(buildParams(sp)));
+                const responses = await Promise.all(fetchPromises);
+                if (latestRequestRef.current !== requestId) return;
+                const newPages = { ...localServerPages };
+                let newCount = count;
+                responses.forEach((resp, idx) => {
+                    const sp = pagesToFetch[idx];
+                    newPages[sp] = resp.results ?? [];
+                    if (typeof resp.count === 'number') {
+                        newCount = resp.count;
                     }
                 });
-                return merged;
-            });
-            setPagination({
-                count: response.count ?? 0,
-                next: Boolean(response.next),
-                previous: Boolean(response.previous),
-            });
+                localServerPages = newPages;
+                setServerPages(newPages);
+                if (newCount !== pagination.count) {
+                    setPagination({
+                        count: newCount,
+                        next: page < Math.ceil(newCount / ITEMS_PER_PAGE),
+                        previous: page > 1,
+                    });
+                }
+            }
+
+            // Build the 10-item display slice for the UI page
+            const startOffset = startIndex - (serverPageStart - 1) * (localServerPageSize as number);
+            const concatenated: ExamData[] = [];
+            for (let sp = serverPageStart; sp <= serverPageEnd; sp++) {
+                const arr = localServerPages[sp] ?? [];
+                for (let i = 0; i < arr.length; i++) concatenated.push(arr[i]);
+            }
+            const displaySlice = concatenated.slice(startOffset, startOffset + ITEMS_PER_PAGE);
+            setExams(displaySlice);
         } catch (err: any) {
             if (latestRequestRef.current !== requestId) {
                 return;
@@ -143,43 +195,26 @@ export const PreviousExams = () => {
                 setIsLoading(false);
             }
         }
-    }, [debouncedSearchTerm, orderingParam, page]);
+    }, [selectedSearchTerm, orderingParam, page, selectedSkill, serverPages, serverPageSize, pagination.count]);
 
     useEffect(() => {
         fetchHistoricalExams();
     }, [fetchHistoricalExams]);
 
     const normalize = (v: string | number | null | undefined) => (v ?? "").toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const capitalize = (text: string) => (text ? text.charAt(0).toUpperCase() + text.slice(1) : text);
 
-    const preparedExams = useMemo(() => {
-        return exams.map(e => ({
-            original: e,
-            index: normalize(`${e.date} ${e.topic} ${e.skill} ${e.score}`),
-        }));
+    // Use exams directly from backend - no frontend filtering needed
+    // Backend handles pagination and filtering
+    const filteredExams = useMemo(() => {
+        return exams;
     }, [exams]);
 
-    const normalizedSearch = useMemo(() => normalize(debouncedSearchTerm), [debouncedSearchTerm]);
-
-    const filteredExams = useMemo(() => {
-        let result = preparedExams
-            .filter(pe => {
-                const matchesSearch = normalizedSearch ? pe.index.includes(normalizedSearch) : true;
-                const matchesSkill = selectedSkill ? pe.original.skill === selectedSkill : true;
-                return matchesSearch && matchesSkill;
-            })
-            .map(pe => pe.original);
-
-        if (sortField) {
-            result = result.slice().sort((a, b) => {
-                const aValue = sortField === 'date' ? new Date(a.date).getTime() : getNumericScore(a.score);
-                const bValue = sortField === 'date' ? new Date(b.date).getTime() : getNumericScore(b.score);
-                if (sortDirection === 'asc') return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-                return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-            });
-        }
-
-        return result;
-    }, [preparedExams, normalizedSearch, selectedSkill, sortField, sortDirection]);
+    // Calculate pagination info based on backend count
+    const totalPages = pagination.count > 0 ? Math.ceil(pagination.count / ITEMS_PER_PAGE) : 0;
+    const currentPage = page;
+    const hasNextPage = totalPages > 0 ? currentPage < totalPages : false;
+    const hasPreviousPage = totalPages > 0 ? currentPage > 1 : false;
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -197,14 +232,23 @@ export const PreviousExams = () => {
         setIsSearchDropdownOpen(value.trim().length > 0);
     };
 
+    const handleSearchSelect = (topic: string) => {
+        setSelectedSearchTerm(topic);
+        setSearchTerm(topic);
+        setIsSearchDropdownOpen(false);
+        setPage(1);
+    };
+
     const clearSearch = () => {
         setSearchTerm("");
-        setDebouncedSearchTerm("");
+        setSelectedSearchTerm("");
+        setPage(1);
     };
 
     const handleSkillSelect = (skill: string) => {
         setSelectedSkill(skill);
         setIsSkillDropdownOpen(false);
+        setPage(1);
     };
 
     const handleSkillDropdownToggle = () => {
@@ -214,32 +258,53 @@ export const PreviousExams = () => {
     const clearSkillFilter = () => {
         setSelectedSkill(null);
         setIsSkillDropdownOpen(false);
+        setPage(1);
     };
 
     const handleRetry = () => {
         fetchHistoricalExams();
     };
 
-    useEffect(() => {
-        const target = loadMoreRef.current;
-        if (!target) return;
+    const handlePageChange = (newPage: number) => {
+        // Only allow valid page changes
+        if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage && !isLoading) {
+            setPage(newPage);
+        }
+    };
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                const first = entries[0];
-                if (first.isIntersecting && !isLoading && pagination.next && !error) {
-                    setPage((prev) => prev + 1);
+    const getPageNumbers = () => {
+        const pages: (number | string)[] = [];
+        const maxVisible = 5;
+        
+        if (totalPages <= maxVisible) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                for (let i = 1; i <= 4; i++) {
+                    pages.push(i);
                 }
-            },
-            { root: null, rootMargin: "200px", threshold: 0 }
-        );
-
-        observer.observe(target);
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [isLoading, pagination.next, error]);
+                pages.push('...');
+                pages.push(totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pages.push(1);
+                pages.push('...');
+                for (let i = totalPages - 3; i <= totalPages; i++) {
+                    pages.push(i);
+                }
+            } else {
+                pages.push(1);
+                pages.push('...');
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(totalPages);
+            }
+        }
+        return pages;
+    };
 
     const handleOpenLink = (url?: string | null, fallbackMessage?: string) => {
         if (!url) {
@@ -273,37 +338,118 @@ export const PreviousExams = () => {
         };
     }, [isSkillDropdownOpen, isSearchDropdownOpen]);
 
+    // Fetch all unique skills for dropdown (we need to fetch without filters for this)
+    const [allExamsForSkills, setAllExamsForSkills] = useState<ExamData[]>([]);
+    
+    useEffect(() => {
+        const fetchSkills = async () => {
+            try {
+                const response = await examService.getHistoricalExams({ page: 1 });
+                setAllExamsForSkills(response.results ?? []);
+            } catch (err) {
+                // Silently fail for skills fetch
+            }
+        };
+        fetchSkills();
+    }, []);
+
     const uniqueSkills = useMemo(() => {
-        const skills = exams
+        const skills = allExamsForSkills
             .map(e => e.skill)
             .filter((skill): skill is string => Boolean(skill));
         return Array.from(new Set(skills)).sort();
-    }, [exams]);
+    }, [allExamsForSkills]);
 
     const searchResults = useMemo(() => {
         const q = normalize(searchTerm.trim());
         if (!q) return [] as ExamData[];
-        return preparedExams.filter(pe => pe.index.includes(q)).slice(0, 8).map(pe => pe.original);
-    }, [preparedExams, searchTerm]);
+        // Search in all exams for suggestions
+        return allExamsForSkills
+            .filter(e => {
+                const index = normalize(`${e.date} ${e.topic} ${e.skill} ${e.score}`);
+                return index.includes(q);
+            })
+            .slice(0, 8);
+    }, [allExamsForSkills, searchTerm]);
 
     const noResultsMessage = useMemo(() => {
-        if (selectedSkill || debouncedSearchTerm.trim()) {
+        if (selectedSkill || selectedSearchTerm.trim()) {
             return "No exams match your current filters.";
         }
         return "No previous exams yet";
-    }, [selectedSkill, debouncedSearchTerm]);
+    }, [selectedSkill, selectedSearchTerm]);
 
     const isInitialLoading = isLoading && exams.length === 0;
-    const isFetchingMore = isLoading && exams.length > 0;
+
+    const TableRowSkeleton = () => {
+        return (
+            <tr className="h-8">
+                <td className="p-2 px-5  border-b border-t border-[#8E92BC]">
+                    <div className="h-4 w-24 rounded bg-slate-200 animate-pulse" />
+                </td>
+                <td className="p-2 px-5  border-b border-t border-[#8E92BC]">
+                    <div className="h-6 w-6 rounded-full bg-slate-200 animate-pulse" />
+                </td>
+                <td className="p-2 px-5  border-b border-t border-[#8E92BC]">
+                    <div className="h-4 w-12 rounded bg-slate-200 animate-pulse" />
+                </td>
+                <td className="p-2 px-5  border-b border-t border-[#8E92BC]">
+                    <div className="h-4 w-48 rounded bg-slate-200 animate-pulse" />
+                </td>
+                <td className="p-2 px-5  border-b border-t border-[#8E92BC]">
+                    <div className="flex items-center gap-2">
+                        <div className="h-9 w-24 rounded bg-slate-200 animate-pulse" />
+                        <div className="h-9 w-28 rounded bg-slate-200 animate-pulse" />
+                    </div>
+                </td>
+            </tr>
+        );
+    };
+
+    const MobileCardSkeleton = () => {
+        return (
+            <div className="rounded-2xl border border-[#F4EFFF] bg-white p-5 shadow-[0px_8px_24px_rgba(35,8,90,0.08)] animate-pulse">
+                <div className="flex items-start justify-between gap-3">
+                    <div>
+                        <div className="h-3 w-14 rounded bg-slate-200" />
+                        <div className="mt-2 h-5 w-28 rounded bg-slate-200" />
+                    </div>
+                    <div className="flex items-center gap-2 rounded-full bg-[#F4EFFF] px-3 py-1">
+                        <div className="h-5 w-5 rounded-full bg-slate-200" />
+                        <div className="h-3 w-16 rounded bg-slate-200" />
+                    </div>
+                </div>
+                <div className="mt-4">
+                    <div className="h-3 w-12 rounded bg-slate-200" />
+                    <div className="mt-2 h-4 w-40 rounded bg-slate-200" />
+                </div>
+                <div className="mt-4 rounded-2xl border border-[#F4EFFF] bg-[#EFECF5] px-4 py-3">
+                    <div className="h-3 w-12 rounded bg-slate-200" />
+                    <div className="mt-2 h-7 w-16 rounded bg-slate-200" />
+                    <div className="mt-1 h-3 w-20 rounded bg-slate-200" />
+                </div>
+                <div className="mt-4 flex flex-col gap-2">
+                    <div className="h-9 w-full rounded bg-slate-200" />
+                    <div className="h-9 w-full rounded bg-slate-200" />
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="w-full h-full bg-[#F6F6FB] mt-15  rounded-[12px] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
             <h2 className="text-[16px] sm:text-[20px] font-semibold text-[#23085A]">Previous Exams</h2>
-        <div className="relative w-full h-full mt-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] border border-[#F4EFFF] overflow-x-auto hidden sm:block">
+        <div className="relative w-full h-full mt-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] border border-[#F4EFFF] overflow-x-auto hidden sm:block" aria-busy={isLoading}>
                 {isLoading && (
-                    <div className="absolute top-4 right-6 text-xs font-medium text-slate-500">
-                        {isInitialLoading ? "Loading..." : "Refreshing..."}
-                    </div>
+                    <>
+                        <div className="absolute left-0 top-0 h-1 w-full overflow-hidden rounded-t-[12px]">
+                            <div className="h-full w-full bg-gradient-to-r from-[#EFECF5] via-[#D7D5E4] to-[#EFECF5] animate-pulse" />
+                        </div>
+                        <div className="absolute top-4 right-6 flex items-center gap-2 text-xs font-medium text-slate-500">
+                            <Loader2 className="w-3 h-3 animate-spin text-[#23085A]" />
+                            <span>{isInitialLoading ? "Loading..." : "Refreshing..."}</span>
+                        </div>
+                    </>
                 )}
                 <table className="w-full min-w-[720px] text-left table-auto border-separate border-spacing-0 text-xs sm:text-sm">
                     <thead>
@@ -320,7 +466,7 @@ export const PreviousExams = () => {
                             </th>
                             <th className="p-2 px-5  border-b border-slate-300 bg-slate-50 h-8 relative text-left">
                                 <div className="flex items-center justify-start text-[14px] sm:text-[16.25px] font-medium leading-none text-[#23085A] h-full">
-                                    <span>{selectedSkill ? selectedSkill : "Skill"}</span>
+                                    <span>{selectedSkill ? capitalize(selectedSkill) : "Skill"}</span>
                                     <div className="relative" ref={dropdownRef}>
                                         <button
                                             onClick={handleSkillDropdownToggle}
@@ -337,19 +483,17 @@ export const PreviousExams = () => {
                                                         className={`w-full text-left px-3 py-2 text-sm hover:bg-[#EFECF5] cursor-pointer transition-colors ${selectedSkill === null ? 'bg-[#EFECF5] text-[#23085A] font-semibold' : 'text-slate-700'
                                                             }`}
                                                     >
-                                                        All Skills ({exams.length})
+                                                        All Skills
                                                     </button>
                                                     {uniqueSkills.map((skill) => {
-                                                        const count = exams.filter(exam => exam.skill === skill).length;
                                                         return (
                                                             <button
                                                                 key={skill}
                                                                 onClick={() => handleSkillSelect(skill)}
-                                                                className={`w-full text-left px-3 py-2 text-sm hover:bg-[#EFECF5] cursor-pointer flex justify-between items-center transition-colors ${selectedSkill === skill ? 'bg-[#EFECF5] text-[#23085A] font-semibold' : 'text-slate-700'
+                                                                className={`w-full text-left px-3 py-2 text-sm hover:bg-[#EFECF5] cursor-pointer transition-colors ${selectedSkill === skill ? 'bg-[#EFECF5] text-[#23085A] font-semibold' : 'text-slate-700'
                                                                     }`}
                                                             >
-                                                                <span>{skill}</span>
-                                                                <span className={`text-xs px-1.5 py-0.5 rounded ${selectedSkill === skill ? 'bg-[#23085A] text-white' : 'bg-slate-200 text-slate-600'}`}>{count}</span>
+                                                                <span>{capitalize(skill)}</span>
                                                             </button>
                                                         );
                                                     })}
@@ -370,7 +514,7 @@ export const PreviousExams = () => {
                             <th className="p-2 px-5  border-b border-slate-300 bg-slate-50 h-8 text-left">
                                 <div className="flex items-center justify-start h-full">
                                     <div className="flex p-[8px] bg-[#EFECF5] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] items-center gap-2 relative" ref={searchDropdownRef}>
-                                        <SearchIcon className={`w-4 text-[#23085A] ${searchTerm !== debouncedSearchTerm ? 'animate-pulse' : ''}`} />
+                                        <SearchIcon className="w-4 text-[#23085A]" />
                                         <input
                                             type="text"
                                             placeholder="Search"
@@ -379,7 +523,7 @@ export const PreviousExams = () => {
                                             onFocus={() => setIsSearchDropdownOpen(searchTerm.trim().length > 0)}
                                             className="bg-transparent border-none outline-none text-[14px] sm:text-[16.25px] text-slate-800 placeholder-slate-500 w-full"
                                         />
-                                        {searchTerm && (
+                                        {(searchTerm || selectedSearchTerm) && (
                                             <button
                                                 onClick={clearSearch}
                                                 className="text-slate-400 hover:text-slate-600 transition-colors"
@@ -394,12 +538,7 @@ export const PreviousExams = () => {
                                                     <button
                                                         key={r.id}
                                                         className="w-full text-left px-3 py-2 hover:bg-[#EFECF5] cursor-pointer"
-                                                        onClick={() => {
-                                                            setSearchTerm(r.topic);
-                                                            setDebouncedSearchTerm(r.topic);
-                                                            setIsSearchDropdownOpen(false);
-                                                            setPage(1);
-                                                        }}
+                                                        onClick={() => handleSearchSelect(r.topic)}
                                                     >
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-[#23085A] text-[13px] sm:text-[14px] font-medium">{r.topic}</span>
@@ -416,9 +555,14 @@ export const PreviousExams = () => {
                                     </div>
                                 </div>
                             </th>
+                            <th className="p-2 px-5  border-b border-slate-300 bg-slate-50 h-8 text-left">
+                                <div className="flex items-center justify-start text-[14px] sm:text-[16.25px] font-medium leading-none text-[#23085A] h-full">
+                                    Actions
+                                </div>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className={`transition-opacity duration-300 ${isLoading ? 'opacity-40' : 'opacity-100'}`}>
                         {error && exams.length === 0 ? (
                             <tr>
                                 <td className="p-6 text-center text-slate-500 border-b border-t border-[#8E92BC]" colSpan={5}>
@@ -434,11 +578,11 @@ export const PreviousExams = () => {
                                 </td>
                             </tr>
                         ) : isInitialLoading ? (
-                            <tr>
-                                <td className="p-6 text-center text-slate-500 border-b border-t border-[#8E92BC]" colSpan={5}>
-                                    Loading previous exams...
-                                </td>
-                            </tr>
+                            <>
+                                {Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => (
+                                    <TableRowSkeleton key={`skeleton-${idx}`} />
+                                ))}
+                            </>
                         ) : filteredExams.length === 0 ? (
                             <tr>
                                 <td className="p-6 text-center text-slate-500 border-b border-t border-[#8E92BC]" colSpan={5}>
@@ -451,13 +595,11 @@ export const PreviousExams = () => {
                                 if (!exam.id || isNaN(Number(exam.id))) {
                                     return null;
                                 }
-                                const isSelected = selectedSkill !== null && exam.skill === selectedSkill;
                                 const scoreDisplay = getScoreDisplay(exam.score);
-                                const hasFinalAnswer = Boolean(exam.final_answer);
                                 const hasReport = Boolean(exam.full_report_url);
                                 const skillIcon = getSkillIcon(exam.skill);
                                 return (
-                                    <tr key={exam.id} className={`h-8 transition-colors ${isSelected ? 'bg-[#EFECF5] hover:bg-[#E1D4F0]' : 'hover:bg-slate-50'}`}>
+                                    <tr key={exam.id} className="h-8 transition-colors hover:bg-slate-50">
                                         <td className="p-2 px-5  border-b border-t border-[#8E92BC] text-start">
                                             <p className="block text-[14px] sm:text-[16.25px] text-slate-800">
                                                 {exam.date}
@@ -511,46 +653,77 @@ export const PreviousExams = () => {
                     </tbody>
                 </table>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mt-4 text-sm text-slate-600">
-                {/* <p>
-                    {pagination.count
-                        ? `Loaded ${Math.min(exams.length, pagination.count)} of ${pagination.count} exam${pagination.count === 1 ? '' : 's'}`
-                        : exams.length
-                            ? `Loaded ${exams.length} exam${exams.length === 1 ? '' : 's'}`
-                            : 'No exams found'}
-                    {filteredExams.length
-                        ? ` · ${filteredExams.length} visible${selectedSkill ? ` for ${selectedSkill}` : ''}`
-                        : ''}
-                </p>
-                <span className="text-xs text-slate-500">
-                    {pagination.next
-                        ? "More results will load automatically"
-                        : exams.length
-                            ? "End of results"
-                            : ""}
-                </span> */}
-            </div>
-            {/* <div
-                ref={loadMoreRef}
-                className="mt-2 h-12 flex items-center justify-center text-xs text-slate-500"
-            >
-                {error && exams.length > 0 ? (
-                    <button
-                        onClick={handleRetry}
-                        className="px-3 py-1.5 rounded-md border border-[#D7D5E4] text-[#23085A] text-xs font-medium hover:bg-[#EFECF5] transition-colors"
-                    >
-                        Couldn’t load more. Tap to retry.
-                    </button>
-                ) : isFetchingMore ? (
-                    "Loading more exams..."
-                ) : pagination.next ? (
-                    "Scroll to load more"
-                ) : exams.length ? (
-                    "You're all caught up."
-                ) : (
-                    ""
-                )}
-            </div> */}
+            {!error && (totalPages > 1) && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2">
+                    <div className="text-sm text-slate-600">
+                        Showing {filteredExams.length > 0 ? ((currentPage - 1) * ITEMS_PER_PAGE) + 1 : 0} to {((currentPage - 1) * ITEMS_PER_PAGE) + filteredExams.length} of {pagination.count} exam{pagination.count === 1 ? '' : 's'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => handlePageChange(1)}
+                            disabled={!hasPreviousPage || isLoading}
+                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="First page"
+                        >
+                            First
+                        </button>
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={!hasPreviousPage || isLoading}
+                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                            <span className="hidden sm:inline">Previous</span>
+                        </button>
+                        
+                        <div className="flex items-center cursor-pointer gap-1">
+                            {getPageNumbers().map((pageNum, idx) => {
+                                if (pageNum === '...') {
+                                    return (
+                                        <span key={`ellipsis-${idx}`} className="px-2 text-slate-500">
+                                            ...
+                                        </span>
+                                    );
+                                }
+                                const pageNumber = pageNum as number;
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        onClick={() => handlePageChange(pageNumber)}
+                                        disabled={isLoading}
+                                        className={`px-3 py-2 cursor-pointer rounded-lg text-sm font-medium transition-colors min-w-[40px] ${
+                                            currentPage === pageNumber
+                                                ? 'bg-[#23085A] text-white'
+                                                : 'border border-[#D7D5E4] text-[#23085A] hover:bg-[#EFECF5]'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        aria-current={currentPage === pageNumber ? 'page' : undefined}
+                                        aria-label={`Page ${pageNumber}`}
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={!hasNextPage || isLoading}
+                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span className="hidden sm:inline">Next</span>
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => handlePageChange(totalPages)}
+                            disabled={!hasNextPage || isLoading}
+                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Last page"
+                        >
+                            Last
+                        </button>
+                    </div>
+                </div>
+            )}
         <div className="sm:hidden mt-6 space-y-4">
             {error && exams.length === 0 ? (
                 <div className="rounded-2xl border border-[#8E92BC] bg-white p-5 text-center text-slate-600 shadow-sm">
@@ -564,71 +737,128 @@ export const PreviousExams = () => {
                 </div>
             ) : isInitialLoading ? (
                 <div className="rounded-2xl border border-[#8E92BC] bg-white p-5 text-center text-slate-600 shadow-sm">
-                    Loading previous exams...
+                    <div className="mx-auto mb-4 h-3 w-24 rounded bg-slate-200 animate-pulse" />
+                    {Array.from({ length: 3 }).map((_, idx) => (
+                        <div key={`mobile-skeleton-${idx}`} className="mt-4">
+                            <MobileCardSkeleton />
+                        </div>
+                    ))}
                 </div>
             ) : filteredExams.length === 0 ? (
                 <div className="rounded-2xl border border-[#8E92BC] bg-white p-5 text-center text-slate-600 shadow-sm">
                     {noResultsMessage}
                 </div>
             ) : (
-                filteredExams.map((exam) => {
-                    // Skip exams without valid IDs
-                    if (!exam.id || isNaN(Number(exam.id))) {
-                        return null;
-                    }
-                    const scoreDisplay = getScoreDisplay(exam.score);
-                    const hasFinalAnswer = Boolean(exam.final_answer);
-                    const hasReport = Boolean(exam.full_report_url);
-                    const skillIcon = getSkillIcon(exam.skill);
-                    return (
-                        <div
-                            key={exam.id}
-                            className="rounded-2xl border border-[#F4EFFF] bg-white p-5 shadow-[0px_8px_24px_rgba(35,8,90,0.08)]"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <p className="text-[11px] uppercase tracking-wide text-slate-500">Date</p>
-                                    <p className="text-lg font-semibold text-[#23085A]">{exam.date}</p>
+                <>
+                    <div className={`transition-opacity duration-300 ${isLoading ? 'opacity-40' : 'opacity-100'}`}>
+                    {filteredExams.map((exam) => {
+                        if (!exam.id || isNaN(Number(exam.id))) {
+                            return null;
+                        }
+                        const scoreDisplay = getScoreDisplay(exam.score);
+                        const hasReport = Boolean(exam.full_report_url);
+                        const skillIcon = getSkillIcon(exam.skill);
+                        return (
+                            <div
+                                key={exam.id}
+                                className="rounded-2xl border border-[#F4EFFF] bg-white p-5 shadow-[0px_8px_24px_rgba(35,8,90,0.08)]"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p className="text-[11px] uppercase tracking-wide text-slate-500">Date</p>
+                                        <p className="text-lg font-semibold text-[#23085A]">{exam.date}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 rounded-full bg-[#F4EFFF] px-3 py-1 text-[#23085A]">
+                                        {skillIcon}
+                                        <span className="text-sm font-semibold">{exam.skill ?? "N/A"}</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2 rounded-full bg-[#F4EFFF] px-3 py-1 text-[#23085A]">
-                                    {skillIcon}
-                                    <span className="text-sm font-semibold">{exam.skill ?? "N/A"}</span>
+                                <div className="mt-4">
+                                    <p className="text-[11px] uppercase tracking-wide text-slate-500">Topic</p>
+                                    <p className="mt-1 text-base font-semibold text-slate-800">{exam.topic}</p>
+                                </div>
+                                <div className="mt-4 rounded-2xl border border-[#F4EFFF] bg-[#EFECF5] px-4 py-3">
+                                    <p className="text-[11px] uppercase tracking-wide text-slate-500">Score</p>
+                                    <p className="text-3xl font-bold text-[#23085A]">{scoreDisplay ?? "--"}</p>
+                                    <p className="text-xs text-slate-500">Band result</p>
+                                </div>
+                                <div className="mt-4 flex flex-col gap-2">
+                                    <button
+                                        className="w-full rounded-xl border border-[#00000033] px-4 py-2 text-base font-semibold text-[#23085A] transition-colors bg-[#F4EFFF] hover:bg-[#e0d3ff]"
+                                        onClick={() => {
+                                            if (exam.id && !isNaN(Number(exam.id))) {
+                                                handleViewExam(exam.id);
+                                            } else {
+                                                toast.error("Invalid exam ID");
+                                            }
+                                        }}
+                                    >
+                                        View
+                                    </button>
+                                    <button
+                                        className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-colors ${hasReport ? 'bg-[#23085A] text-white hover:bg-[#1a0643]' : 'bg-[#F2F2F4] text-[#23085A] opacity-50 cursor-not-allowed'}`}
+                                        onClick={() => hasReport && handleOpenLink(exam.full_report_url, "Full report not available yet.")}
+                                        disabled={!hasReport}
+                                    >
+                                        Full Report
+                                        <MapIcon />
+                                    </button>
                                 </div>
                             </div>
-                            <div className="mt-4">
-                                <p className="text-[11px] uppercase tracking-wide text-slate-500">Topic</p>
-                                <p className="mt-1 text-base font-semibold text-slate-800">{exam.topic}</p>
+                        );
+                    })}
+                    
+                    {/* Mobile Pagination */}
+                    {!error && (totalPages > 1 || hasNextPage || hasPreviousPage) && (
+                        <div className="flex flex-col items-center gap-4 mt-6">
+                            <div className="text-sm text-slate-600 text-center">
+                                Showing {filteredExams.length > 0 ? ((currentPage - 1) * ITEMS_PER_PAGE) + 1 : 0} to {((currentPage - 1) * ITEMS_PER_PAGE) + filteredExams.length} of {pagination.count} exam{pagination.count === 1 ? '' : 's'}
                             </div>
-                            <div className="mt-4 rounded-2xl border border-[#F4EFFF] bg-[#EFECF5] px-4 py-3">
-                                <p className="text-[11px] uppercase tracking-wide text-slate-500">Score</p>
-                                <p className="text-3xl font-bold text-[#23085A]">{scoreDisplay ?? "--"}</p>
-                                <p className="text-xs text-slate-500">Band result</p>
-                            </div>
-                            <div className="mt-4 flex flex-col gap-2">
+                            <div className="flex items-center gap-2 w-full">
                                 <button
-                                    className="w-full rounded-xl border border-[#00000033] px-4 py-2 text-base font-semibold text-[#23085A] transition-colors bg-[#F4EFFF] hover:bg-[#e0d3ff]"
-                                    onClick={() => {
-                                        if (exam.id && !isNaN(Number(exam.id))) {
-                                            handleViewExam(exam.id);
-                                        } else {
-                                            toast.error("Invalid exam ID");
-                                        }
-                                    }}
+                                    onClick={() => handlePageChange(1)}
+                                    disabled={!hasPreviousPage || isLoading}
+                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    aria-label="First page"
                                 >
-                                    View
+                                    First
                                 </button>
                                 <button
-                                    className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition-colors ${hasReport ? 'bg-[#23085A] text-white hover:bg-[#1a0643]' : 'bg-[#F2F2F4] text-[#23085A] opacity-50 cursor-not-allowed'}`}
-                                    onClick={() => hasReport && handleOpenLink(exam.full_report_url, "Full report not available yet.")}
-                                    disabled={!hasReport}
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={!hasPreviousPage || isLoading}
+                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Full Report
-                                    <MapIcon />
+                                    <ChevronLeft className="w-4 h-4" />
+                                    Previous
+                                </button>
+                                
+                                <div className="flex items-center gap-1 px-2">
+                                    <span className="text-sm text-slate-600">
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                </div>
+                                
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={!hasNextPage || isLoading}
+                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Next
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(totalPages)}
+                                    disabled={!hasNextPage || isLoading}
+                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    aria-label="Last page"
+                                >
+                                    Last
                                 </button>
                             </div>
                         </div>
-                    );
-                })
+                    )}
+                    </div>
+                </>
             )}
         </div>
     </div>

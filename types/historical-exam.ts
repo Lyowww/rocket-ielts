@@ -21,5 +21,8 @@ export interface HistoricalExamQueryParams {
   search?: string;
   ordering?: string;
   page?: number;
+  limit?: number;
+  page_size?: number;
+  skill?: string;
 }
 
