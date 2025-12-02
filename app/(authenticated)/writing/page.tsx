@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 const WritingPage = () => {
   return (
-    <div className="w-full h-full bg-[#f8f8f8] mt-20 rounded-[10px] p-10">
+    <div className="w-full h-full bg-[#F0F0F0] mt-20 rounded-[10px] p-10">
       <Writing />
     </div>
   );

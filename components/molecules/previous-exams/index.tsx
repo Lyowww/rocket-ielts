@@ -306,6 +306,25 @@ export const PreviousExams = () => {
         return pages;
     };
 
+    const getMobilePageNumbers = () => {
+        // On mobile, show only current page and adjacent pages (max 3 pages)
+        const pages: (number | string)[] = [];
+        if (totalPages <= 3) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            if (currentPage === 1) {
+                pages.push(1, 2, 3);
+            } else if (currentPage === totalPages) {
+                pages.push(totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(currentPage - 1, currentPage, currentPage + 1);
+            }
+        }
+        return pages;
+    };
+
     const handleOpenLink = (url?: string | null, fallbackMessage?: string) => {
         if (!url) {
             toast.error(fallbackMessage ?? "Link not available yet.");
@@ -437,7 +456,7 @@ export const PreviousExams = () => {
     };
 
     return (
-        <div className="w-full h-full bg-[#F6F6FB] mt-15  rounded-[12px] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+        <div className="w-full h-full bg-[#F0F0F0] mt-15  rounded-[12px] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
             <h2 className="text-[16px] sm:text-[20px] font-semibold text-[#23085A]">Previous Exams</h2>
         <div className="relative w-full h-full mt-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] border border-[#F4EFFF] overflow-x-auto hidden sm:block" aria-busy={isLoading}>
                 {isLoading && (
@@ -476,8 +495,8 @@ export const PreviousExams = () => {
                                             <Settings2 className="w-5 text-[#23085A]" />
                                         </button>
                                         {isSkillDropdownOpen && (
-                                            <div className="absolute top-full left-0 mt-1 bg-[#23085A] p-[2px] rounded-[10px] shadow-lg z-50 min-w-[200px]">
-                                                <div className="bg-white rounded-[9px] py-1 h-auto overflow-auto">
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-1 bg-[#23085A] p-[2px] rounded-[10px] shadow-lg z-50 min-w-[200px] w-[calc(100vw-2rem)] sm:w-auto sm:max-w-none">
+                                                <div className="bg-white rounded-[9px] py-1 h-auto overflow-auto max-h-[60vh] sm:max-h-none">
                                                     <button
                                                         onClick={clearSkillFilter}
                                                         className={`w-full text-left px-3 py-2 text-sm hover:bg-[#EFECF5] cursor-pointer transition-colors ${selectedSkill === null ? 'bg-[#EFECF5] text-[#23085A] font-semibold' : 'text-slate-700'
@@ -533,7 +552,7 @@ export const PreviousExams = () => {
                                         )}
 
                                         {isSearchDropdownOpen && searchResults.length > 0 && (
-                                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-[#F4EFFF] rounded-[10px] shadow-lg z-50 h-64 overflow-auto">
+                                            <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-[#F4EFFF] rounded-[10px] shadow-lg z-50 h-64 max-h-[60vh] overflow-auto">
                                                 {searchResults.map(r => (
                                                     <button
                                                         key={r.id}
@@ -654,44 +673,42 @@ export const PreviousExams = () => {
                 </table>
             </div>
             {!error && (totalPages > 1) && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2">
-                    <div className="text-sm text-slate-600">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mt-6 px-2">
+                    <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
                         Showing {filteredExams.length > 0 ? ((currentPage - 1) * ITEMS_PER_PAGE) + 1 : 0} to {((currentPage - 1) * ITEMS_PER_PAGE) + filteredExams.length} of {pagination.count} exam{pagination.count === 1 ? '' : 's'}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center w-full sm:w-auto">
+                        {/* First button - hidden on mobile, visible on md+ */}
                         <button
                             onClick={() => handlePageChange(1)}
                             disabled={!hasPreviousPage || isLoading}
-                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="hidden md:flex items-center cursor-pointer gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-xs sm:text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="First page"
                         >
                             First
                         </button>
+                        
+                        {/* Previous button - chevron only on mobile */}
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={!hasPreviousPage || isLoading}
-                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center justify-center cursor-pointer gap-1 px-2.5 sm:px-3 py-2 sm:py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-xs sm:text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] sm:min-w-auto"
+                            aria-label="Previous page"
                         >
-                            <ChevronLeft className="w-4 h-4" />
+                            <ChevronLeft className="w-4 h-4 sm:w-4 sm:h-4" />
                             <span className="hidden sm:inline">Previous</span>
                         </button>
                         
-                        <div className="flex items-center cursor-pointer gap-1">
-                            {getPageNumbers().map((pageNum, idx) => {
-                                if (pageNum === '...') {
-                                    return (
-                                        <span key={`ellipsis-${idx}`} className="px-2 text-slate-500">
-                                            ...
-                                        </span>
-                                    );
-                                }
+                        {/* Mobile page numbers - show only 3 pages max */}
+                        <div className="flex md:hidden items-center gap-1">
+                            {getMobilePageNumbers().map((pageNum) => {
                                 const pageNumber = pageNum as number;
                                 return (
                                     <button
                                         key={pageNumber}
                                         onClick={() => handlePageChange(pageNumber)}
                                         disabled={isLoading}
-                                        className={`px-3 py-2 cursor-pointer rounded-lg text-sm font-medium transition-colors min-w-[40px] ${
+                                        className={`px-3 py-2 cursor-pointer rounded-lg text-xs font-medium transition-colors min-w-[36px] ${
                                             currentPage === pageNumber
                                                 ? 'bg-[#23085A] text-white'
                                                 : 'border border-[#D7D5E4] text-[#23085A] hover:bg-[#EFECF5]'
@@ -705,18 +722,51 @@ export const PreviousExams = () => {
                             })}
                         </div>
                         
+                        <div className="hidden md:flex items-center cursor-pointer gap-0.5 sm:gap-1">
+                            {getPageNumbers().map((pageNum, idx) => {
+                                if (pageNum === '...') {
+                                    return (
+                                        <span key={`ellipsis-${idx}`} className="px-1 sm:px-2 text-slate-500 text-xs sm:text-sm">
+                                            ...
+                                        </span>
+                                    );
+                                }
+                                const pageNumber = pageNum as number;
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        onClick={() => handlePageChange(pageNumber)}
+                                        disabled={isLoading}
+                                        className={`px-2 sm:px-3 py-1.5 sm:py-2 cursor-pointer rounded-lg text-xs sm:text-sm font-medium transition-colors min-w-[32px] sm:min-w-[40px] ${
+                                            currentPage === pageNumber
+                                                ? 'bg-[#23085A] text-white'
+                                                : 'border border-[#D7D5E4] text-[#23085A] hover:bg-[#EFECF5]'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        aria-current={currentPage === pageNumber ? 'page' : undefined}
+                                        aria-label={`Page ${pageNumber}`}
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        
+                        {/* Next button - chevron only on mobile */}
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={!hasNextPage || isLoading}
-                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center justify-center cursor-pointer gap-1 px-2.5 sm:px-3 py-2 sm:py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-xs sm:text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[40px] sm:min-w-auto"
+                            aria-label="Next page"
                         >
                             <span className="hidden sm:inline">Next</span>
-                            <ChevronRight className="w-4 h-4" />
+                            <ChevronRight className="w-4 h-4 sm:w-4 sm:h-4" />
                         </button>
+                        
+                        {/* Last button - hidden on mobile, visible on md+ */}
                         <button
                             onClick={() => handlePageChange(totalPages)}
                             disabled={!hasNextPage || isLoading}
-                            className="flex items-center cursor-pointer gap-1 px-3 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="hidden md:flex items-center cursor-pointer gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-xs sm:text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Last page"
                         >
                             Last
@@ -810,49 +860,52 @@ export const PreviousExams = () => {
                     
                     {/* Mobile Pagination */}
                     {!error && (totalPages > 1 || hasNextPage || hasPreviousPage) && (
-                        <div className="flex flex-col items-center gap-4 mt-6">
-                            <div className="text-sm text-slate-600 text-center">
+                        <div className="flex flex-col items-center gap-3 mt-6">
+                            <div className="text-xs text-slate-600 text-center">
                                 Showing {filteredExams.length > 0 ? ((currentPage - 1) * ITEMS_PER_PAGE) + 1 : 0} to {((currentPage - 1) * ITEMS_PER_PAGE) + filteredExams.length} of {pagination.count} exam{pagination.count === 1 ? '' : 's'}
                             </div>
-                            <div className="flex items-center gap-2 w-full">
-                                <button
-                                    onClick={() => handlePageChange(1)}
-                                    disabled={!hasPreviousPage || isLoading}
-                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    aria-label="First page"
-                                >
-                                    First
-                                </button>
+                            <div className="flex items-center gap-2 w-full justify-center">
+                                {/* Previous button - chevron only */}
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={!hasPreviousPage || isLoading}
-                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center justify-center cursor-pointer px-3 py-2.5 rounded-lg border border-[#D7D5E4] text-[#23085A] hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
+                                    aria-label="Previous page"
                                 >
-                                    <ChevronLeft className="w-4 h-4" />
-                                    Previous
+                                    <ChevronLeft className="w-5 h-5" />
                                 </button>
                                 
-                                <div className="flex items-center gap-1 px-2">
-                                    <span className="text-sm text-slate-600">
-                                        Page {currentPage} of {totalPages}
-                                    </span>
+                                {/* Page numbers - show only 3 pages max */}
+                                <div className="flex items-center gap-1">
+                                    {getMobilePageNumbers().map((pageNum) => {
+                                        const pageNumber = pageNum as number;
+                                        return (
+                                            <button
+                                                key={pageNumber}
+                                                onClick={() => handlePageChange(pageNumber)}
+                                                disabled={isLoading}
+                                                className={`px-3 py-2 cursor-pointer rounded-lg text-sm font-medium transition-colors min-w-[40px] ${
+                                                    currentPage === pageNumber
+                                                        ? 'bg-[#23085A] text-white'
+                                                        : 'border border-[#D7D5E4] text-[#23085A] hover:bg-[#EFECF5]'
+                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                aria-current={currentPage === pageNumber ? 'page' : undefined}
+                                                aria-label={`Page ${pageNumber}`}
+                                            >
+                                                {pageNumber}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                                 
+                                {/* Next button - chevron only */}
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={!hasNextPage || isLoading}
-                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center justify-center cursor-pointer px-3 py-2.5 rounded-lg border border-[#D7D5E4] text-[#23085A] hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px]"
+                                    aria-label="Next page"
                                 >
-                                    Next
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(totalPages)}
-                                    disabled={!hasNextPage || isLoading}
-                                    className="flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-lg border border-[#D7D5E4] text-[#23085A] text-sm font-medium hover:bg-[#EFECF5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    aria-label="Last page"
-                                >
-                                    Last
+                                    <ChevronRight className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>

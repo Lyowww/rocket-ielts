@@ -118,7 +118,7 @@
     @apply border-border outline-ring/50 font-dm;
   }
   body {
-    @apply text-foreground bg-[#f8f8f8] m-0 p-0 box-border;
+    @apply text-foreground bg-[#F0F0F0] m-0 p-0 box-border;
   }
   img {
     user-select: none;

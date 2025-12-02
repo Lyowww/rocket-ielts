@@ -309,7 +309,7 @@ const HistoricalExamDetailPage = () => {
   const finalAnswerParsed = parseFinalAnswer(exam.final_answer);
 
   return (
-    <div className="w-full min-h-screen bg-[#F6F6FB] p-4 md:p-6 lg:p-8">
+    <div className="w-full min-h-screen bg-[#F0F0F0] p-4 md:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
         <Button
           onClick={() => router.push(PrivateRouteEnum.dashboard)}
