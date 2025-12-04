@@ -533,23 +533,22 @@ export const PreviousExams = () => {
                             <th className="p-2 px-5  border-b border-slate-300 bg-slate-50 h-8 text-left">
                                 <div className="flex items-center justify-start h-full">
                                     <div className="flex p-[8px] bg-[#EFECF5] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] rounded-[12px] items-center gap-2 relative" ref={searchDropdownRef}>
-                                        <SearchIcon className="w-4 text-[#23085A]" />
+                                        <SearchIcon className="w-4 text-[#23085A] flex-shrink-0" />
                                         <input
                                             type="text"
                                             placeholder="Search"
                                             value={searchTerm}
                                             onChange={handleSearchChange}
                                             onFocus={() => setIsSearchDropdownOpen(searchTerm.trim().length > 0)}
-                                            className="bg-transparent border-none outline-none text-[14px] sm:text-[16.25px] text-slate-800 placeholder-slate-500 w-full"
+                                            className="bg-transparent border-none outline-none text-[14px] sm:text-[16.25px] text-slate-800 placeholder-slate-500 flex-1 min-w-0"
                                         />
-                                        {(searchTerm || selectedSearchTerm) && (
-                                            <button
-                                                onClick={clearSearch}
-                                                className="text-slate-400 hover:text-slate-600 transition-colors"
-                                            >
-                                                ✕
-                                            </button>
-                                        )}
+                                        <button
+                                            onClick={clearSearch}
+                                            className={`text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0 w-4 h-4 flex items-center justify-center ${(searchTerm || selectedSearchTerm) ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                                            aria-label="Clear search"
+                                        >
+                                            ✕
+                                        </button>
 
                                         {isSearchDropdownOpen && searchResults.length > 0 && (
                                             <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-[#F4EFFF] rounded-[10px] shadow-lg z-50 h-64 max-h-[60vh] overflow-auto">
