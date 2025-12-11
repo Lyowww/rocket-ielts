@@ -8,7 +8,7 @@ export enum EndpointEnum {
   dummyQuestion = "/ielts-testing/get-dummy-question/",
   dummyEvaluation = "/ielts-testing/get-dummy-evaluation/",
   profile = "/v1/users/profile/",
-  badges = "/v1/users/badges/",
+  badges = "/v1/users/predefined-badges/",
   scores = "/v1/users/scores/",
   challenges = "/v1/users/challenges/",
   historicalExams = "/v1/users/historical-exams/",

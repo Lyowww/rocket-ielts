@@ -12,9 +12,10 @@ import { ProfilePicExample } from "@/assets/images";
 import { useAppSelector } from "@/store/rtk/hooks";
 import { RootState } from "@/store/rtk/store";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import GlobalModal from "@/components/molecules/GlobalModal";
 import { cn } from "@/lib/utils";
+import { PredefinedBadge } from "@/store/rtk/slices/badges.slice";
 
 type ScoreBarProps = {
     selectedTab: number;
@@ -23,6 +24,7 @@ type ScoreBarProps = {
 
 export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
     const scores = useAppSelector((s: RootState) => s.scores.data);
+    const badgesState = useAppSelector((s: RootState) => s.badges);
     console.log("scores", scores)
     const tabs = [
 
@@ -86,44 +88,13 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
         },
     ]
 
-    const milestones = [
-        {
-            id: 0,
-            title: "Complex Sentences",
-            icon: <BookIcon className="w-[14px] h-[12px] text-[#23085A]" />,
-            disabled: true,
-        },
-        {
-            id: 1,
-            title: "Complex Sentences",
-            icon: <BookIcon className="w-[14px] h-[12px] text-[#23085A]" />,
-            disabled: true,
-        },
-        {
-            id: 2,
-            title: "Complex Sentences",
-            icon: <BookIcon className="w-[14px] h-[12px] text-[#23085A]" />,
-            disabled: true,
-        },
-        {
-            id: 3,
-            title: "Complex Sentences",
-            icon: <BookIcon className="w-[14px] h-[12px] text-[#23085A]" />,
-            disabled: true,
-        },
-        {
-            id: 4,
-            title: "Complex Sentences",
-            icon: <BookIcon className="w-[14px] h-[12px] text-[#23085A]" />,
-            disabled: true,
-        },
-        {
-            id: 5,
-            title: "Complex Sentences",
-            icon: <BookIcon className="w-[14px] h-[12px] text-[#23085A]" />,
-            disabled: true,
-        },
-    ]
+    const defaultMilestoneIcon = <BookIcon className="w-[14px] h-[12px] text-[#23085A]" />
+    const milestones: PredefinedBadge[] = useMemo(() => {
+        if (!Array.isArray(badgesState.items)) return []
+        return [...badgesState.items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    }, [badgesState.items])
+    const isMilestonesLoading = badgesState.status === "loading"
+    const hasMilestones = milestones.length > 0
     const [currentActivityIndex, setCurrentActivityIndex] = useState<number>(0);
     const [isMilestonesOpen, setIsMilestonesOpen] = useState<boolean>(false)
     const shouldShowEmptyActivities = true
@@ -170,14 +141,28 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
 
                 <div className="flex w-full flex-col xl:flex-row gap-4 xl:w-2/3">
                     <div className="w-full flex flex-col gap-4 rounded-[12px] bg-[#F7F7F8] p-6 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
-                        <div className="flex items-center justify-center gap-2">
-                            <h2 className="text-base font-bold text-[#23085A]">Milestones</h2>
-                            <AchievementIcon className="h-[15px] w-[11px] text-[#23085A]" />
-                        </div>
+                    <div className="flex items-center justify-center gap-2">
+                        <h2 className="text-base font-bold text-[#23085A]">Milestones</h2>
+                        <AchievementIcon className="h-[15px] w-[11px] text-[#23085A]" />
+                    </div>
+
                         <div className="grid grid-cols-3 gap-2 place-items-center">
-                            {milestones.slice(0, 6).map((el, index) => (
-                                <MilestoneIcon key={index} title={el.title} icon={el.icon} disabled={el.disabled} className="h-[72px] w-[96px] text-[#23085A]" />
-                            ))}
+                            {isMilestonesLoading && (
+                                <p className="col-span-3 text-center text-xs text-[#666666]">Loading milestones...</p>
+                            )}
+                            {!isMilestonesLoading && hasMilestones &&
+                                milestones.slice(0, 6).map((el) => (
+                                    <MilestoneIcon
+                                        key={el.id}
+                                        title={el.name}
+                                        icon={defaultMilestoneIcon}
+                                        disabled={!el.is_active}
+                                        className="h-[72px] w-[96px] text-[#23085A]"
+                                    />
+                                ))}
+                            {!isMilestonesLoading && !hasMilestones && (
+                                <p className="col-span-3 text-center text-xs text-[#666666]">No milestones available yet.</p>
+                            )}
                         </div>
                         <button
                             type="button"
@@ -256,24 +241,29 @@ export const ScoreBar = ({ selectedTab, onSelectTab }: ScoreBarProps) => {
                 </div>
             </div>
 
-            <GlobalModal className="p-4 sm:p-6 md:p-8 lg:p-12 xl:p-20" open={isMilestonesOpen} onOpenChange={setIsMilestonesOpen} isNeedBtn>
+            <GlobalModal open={isMilestonesOpen} onOpenChange={setIsMilestonesOpen} isNeedBtn>
                 <div className="w-full">
                     <div className="mb-4 sm:mb-6 flex items-center justify-center gap-2">
                         <h3 className="text-base sm:text-lg md:text-xl font-semibold text-[#23085A]">Milestones</h3>
                         <AchievementIcon className="h-[12px] w-[9px] sm:h-[15px] sm:w-[11px] text-[#23085A]" />
                     </div>
-                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4">
-                        {[...milestones, ...milestones, ...milestones]
-                            .sort((a, b) => (a.disabled === b.disabled ? 0 : a.disabled ? 1 : -1))
-                            .map((el, index) => (
+                    <div className="p-4 grid grid-cols-2 sm:grid-cols-5 md:grid-cols-7 justify-items-center gap-2 sm:gap-3 md:gap-4">
+                        {isMilestonesLoading && (
+                            <p className="text-xs text-[#666666]">Loading milestones...</p>
+                        )}
+                        {!isMilestonesLoading && hasMilestones &&
+                            milestones.map((el) => (
                                 <MilestoneIcon
-                                    key={index}
-                                    title={el.title}
-                                    icon={el.icon}
-                                    disabled={el.disabled}
+                                    key={el.id}
+                                    title={el.name}
+                                    icon={defaultMilestoneIcon}
+                                    disabled={!el.is_active}
                                     className="inline-block h-[60px] w-[80px] sm:h-[65px] sm:w-[85px] md:h-[70px] md:w-[92px] lg:h-[75px] lg:w-[98px] xl:h-[79px] xl:w-[104px] text-[#23085A]"
                                 />
                             ))}
+                        {!isMilestonesLoading && !hasMilestones && (
+                            <p className="text-xs text-[#666666]">No milestones available yet.</p>
+                        )}
                     </div>
                 </div>
             </GlobalModal>

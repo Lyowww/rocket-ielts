@@ -3,38 +3,46 @@ import { baseApi } from "@/api/api"
 import { EndpointEnum } from "@/enum/endpoints.enum"
 
 type BadgesState = {
-  names: string[]
+  items: PredefinedBadge[]
   status: "idle" | "loading" | "succeeded" | "failed"
   error: string | null
 }
 
+export type PredefinedBadge = {
+  id: number
+  name: string
+  description: string
+  order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 const initialState: BadgesState = {
-  names: [],
+  items: [],
   status: "idle",
   error: null,
 }
 
 export const fetchBadges = createAsyncThunk("badges/fetchAll", async () => {
   if (typeof window !== "undefined") {
-    const cached = localStorage.getItem("badges_names")
+    const cached = localStorage.getItem("predefined_badges")
     if (cached) {
       try {
         const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed)) return parsed as string[]
+        if (Array.isArray(parsed)) return parsed as PredefinedBadge[]
       } catch {}
     }
   }
 
   const response = await baseApi.get(EndpointEnum.badges)
-  const names = Array.isArray(response.data)
-    ? (response.data as any[]).map(b => b?.name).filter(Boolean)
-    : []
+  const items = Array.isArray(response.data) ? (response.data as PredefinedBadge[]) : []
 
   if (typeof window !== "undefined") {
-    localStorage.setItem("badges_names", JSON.stringify(names))
+    localStorage.setItem("predefined_badges", JSON.stringify(items))
   }
 
-  return names as string[]
+  return items
 })
 
 const badgesSlice = createSlice({
@@ -49,8 +57,7 @@ const badgesSlice = createSlice({
       })
       .addCase(fetchBadges.fulfilled, (state, action) => {
         state.status = "succeeded"
-        state.names = action.payload
-        console.log("Badges names", state.names)
+        state.items = action.payload
       })
       .addCase(fetchBadges.rejected, (state, action) => {
         state.status = "failed"
